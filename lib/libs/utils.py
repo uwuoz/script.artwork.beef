@@ -23,7 +23,7 @@ def parent_dir(path):
 
 
 def get_simpledict_updates(original, newdict):
-    return dict(pair for pair in newdict.iteritems() if pair[1] != original.get(pair[0]))
+    return dict(pair for pair in newdict.items() if pair[1] != original.get(pair[0]))
 
 
 # TODO: Load from advancedsettings.xml

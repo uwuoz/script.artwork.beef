@@ -98,7 +98,7 @@ def get_mediatype_id(jsondata):
 
 def get_own_artwork(jsondata):
     return dict((arttype.lower(), unquoteimage(url)) for arttype, url
-        in jsondata['art'].iteritems() if '.' not in arttype)
+        in jsondata['art'].items() if '.' not in arttype)
 
 
 def has_generated_thumbnail(jsondata):
@@ -155,8 +155,8 @@ def item_has_generated_thumbnail(mediaitem):
 
 
 def iter_missing_arttypes(mediaitem, existingart):
-    fromtypes = [key for key, url in existingart.iteritems() if url]
-    for arttype, artinfo in mediatypes.artinfo[mediaitem.mediatype].iteritems():
+    fromtypes = [key for key, url in existingart.items() if url]
+    for arttype, artinfo in mediatypes.artinfo[mediaitem.mediatype].items():
         if arttype in mediaitem.skip_artwork or not artinfo['autolimit']:
             continue
         elif artinfo['autolimit'] == 1:
@@ -171,8 +171,8 @@ def iter_missing_arttypes(mediaitem, existingart):
 
     if mediaitem.mediatype == mediatypes.TVSHOW:
         seasonartinfo = mediatypes.artinfo.get(mediatypes.SEASON)
-        for season in mediaitem.seasons.iteritems():
-            for arttype, artinfo in seasonartinfo.iteritems():
+        for season in mediaitem.seasons.items():
+            for arttype, artinfo in seasonartinfo.items():
                 arttype = '%s.%s.%s' % (mediatypes.SEASON, season[0], arttype)
                 if not artinfo['autolimit']:
                     continue
@@ -309,7 +309,7 @@ def _get_seasons_artwork(seasons):
     resultart = {}
     for season in seasons:
         resultseasons[season['season']] = season['seasonid']
-        for arttype, url in season['art'].iteritems():
+        for arttype, url in season['art'].items():
             arttype = arttype.lower()
             if not arttype.startswith(('tvshow.', 'season.')):
                 resultart['%s.%s.%s' % (mediatypes.SEASON, season['season'], arttype)] = pykodi.unquoteimage(url)

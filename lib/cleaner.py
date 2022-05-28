@@ -21,7 +21,7 @@ old_urls_fix = dict(tvdb=(
 
 
 def clean_artwork(mediaitem):
-    updated_art = dict(_get_clean_art(*art) for art in mediaitem.art.iteritems())
+    updated_art = dict(_get_clean_art(*art) for art in mediaitem.art.items())
     for basetype in iter_base_arttypes(updated_art.keys()):
         updated_art.update(fill_multiart(updated_art, basetype))
     if updated_art.get('cdart') and mediaitem.mediatype == mediatypes.MUSICVIDEO:
@@ -31,7 +31,7 @@ def clean_artwork(mediaitem):
             updated_art['discart'] = updated_art['cdart']
             updated_art['cdart'] = None
 
-    for arttype, url in updated_art.iteritems():
+    for arttype, url in updated_art.items():
         if not url:
             continue
         if not url.startswith(pykodi.notimagefiles) and not mediaitem.borked_filename \
@@ -54,7 +54,7 @@ def remove_specific_arttype(mediaitem, arttype):
     if arttype == '* all':
         return dict((atype, None) for atype in mediaitem.art)
     elif arttype == '* nowhitelist':
-        return dict((atype, None) for atype, url in mediaitem.art.iteritems()
+        return dict((atype, None) for atype, url in mediaitem.art.items()
                     if not keep_arttype(mediaitem.mediatype, atype, url))
     finalart = {}
     if arttype in mediaitem.art:

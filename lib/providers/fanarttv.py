@@ -99,7 +99,7 @@ class FanartTVSeriesProvider(FanartTVAbstractProvider):
 
     def _get_images(self, data, **kwargs):
         result = {}
-        for arttype, artlist in data.iteritems():
+        for arttype, artlist in data.items():
             if arttype not in self.artmap:
                 continue
             for image in artlist:
@@ -164,7 +164,7 @@ class FanartTVMovieProvider(FanartTVAbstractProvider):
 
     def _get_images(self, data, **kwargs):
         result = {}
-        for arttype, artlist in data.iteritems():
+        for arttype, artlist in data.items():
             if arttype not in self.artmap:
                 continue
             for image in artlist:
@@ -215,7 +215,7 @@ class FanartTVMusicVideoProvider(FanartTVAbstractProvider):
                 resultmap[generaltype].append(self.build_image(url, _arttype, image))
 
         result = {}
-        for arttype, artlist in data.iteritems():
+        for arttype, artlist in data.items():
             if arttype != 'albums':
                 poofit(arttype, artlist, result)
             else:

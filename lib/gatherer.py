@@ -24,7 +24,7 @@ class Gatherer(object):
         services_hit = False
         error = None
         mediaitem.forcedart = self.get_forced_artwork(mediaitem, not skipexisting)
-        existingtypes = [key for key, url in mediaitem.art.iteritems() if url]
+        existingtypes = [key for key, url in mediaitem.art.items() if url]
         existingtypes.extend(mediaitem.forcedart.keys())
         if skipexisting:
             if not fsonly and mediaitem.uniqueids and mediaitem.missingart:
@@ -55,7 +55,7 @@ class Gatherer(object):
             return {}
         resultimages = {}
         for provider in providers.forced.get(mediaitem.mediatype, ()):
-            for arttype, image in provider.get_exact_images(mediaitem).iteritems():
+            for arttype, image in provider.get_exact_images(mediaitem).items():
                 if arttype.startswith('season.'):
                     season = arttype.rsplit('.', 2)[1]
                     if int(season) not in mediaitem.seasons:
@@ -99,7 +99,7 @@ class Gatherer(object):
                     log("Error parsing provider response", xbmc.LOGWARNING)
                     log(traceback.format_exc(), xbmc.LOGWARNING)
                 continue
-            for arttype, artlist in providerimages.iteritems():
+            for arttype, artlist in providerimages.items():
                 if arttype.startswith('season.'):
                     season = arttype.rsplit('.', 2)[1]
                     if int(season) not in seasons:

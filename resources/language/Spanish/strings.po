@@ -753,21 +753,19 @@ msgctxt "#32816"
 msgid "{0:d} artwork downloaded"
 msgstr "{0:d} imagen descargada"
 
-
 # Not translated, just need to reference by `msgctxt` as options to 32963
+msgctxt "#32796"
+msgid "Fanart.TV"
+msgstr "Fanart.TV"
 
-msgctxt  "# 32796"
-msgstr  "Fanart.TV"
-msgstr  ""
+msgctxt "#32797"
+msgid "The Movie Database"
+msgstr "The Movie Database"
 
-msgctxt  "# 32797"
-msgstr  "The Movie Database"
-msgstr  ""
+msgctxt "#32798"
+msgid "TheTVDB.com"
+msgstr "TheTVDB.com"
 
-msgctxt  "# 32798"
-msgstr  "TheTVDB.com"
-msgstr  ""
-
-msgctxt  "# 32799"
-msgstr  "TheAudioDB.com"
-msgstr  ""
+msgctxt "#32799"
+msgid "TheAudioDB.com"
+msgstr "TheAudioDB.com"

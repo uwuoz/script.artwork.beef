@@ -20,7 +20,7 @@ def prompt_for_artwork(mediatype, medialabel, availableart, monitor):
         return None, None
 
     arttypes = []
-    for arttype, artlist in availableart.iteritems():
+    for arttype, artlist in availableart.items():
         if arttype.startswith('season.-1.'):
             # Ignore 'all' seasons artwork, as I can't set artwork for it with JSON
             continue

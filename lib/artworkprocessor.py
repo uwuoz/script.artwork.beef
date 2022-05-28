@@ -146,7 +146,7 @@ class ArtworkProcessor(object):
         self.init_run()
         if mediatype == mediatypes.EPISODE:
             series = quickjson.get_item_details(mediaitem.tvshowid, mediatypes.TVSHOW)
-            if not any(uniqueid in settings.autoadd_episodes for uniqueid in series['uniqueid'].itervalues()):
+            if not any(uniqueid in settings.autoadd_episodes for uniqueid in series['uniqueid'].values()):
                 mediaitem.skip_artwork = ['fanart']
 
         info.add_additional_iteminfo(mediaitem, self.processed, search)
@@ -321,7 +321,7 @@ class ArtworkProcessor(object):
                 if not self.debug:
                     add_art_to_library(mediatype, mediaitem.seasons, mediaitem.dbid, cleaned)
                 mediaitem.art.update(cleaned)
-                mediaitem.art = dict(item for item in mediaitem.art.iteritems() if item[1])
+                mediaitem.art = dict(item for item in mediaitem.art.items() if item[1])
 
         mediaitem.missingart = list(info.iter_missing_arttypes(mediaitem, mediaitem.art))
 
@@ -329,7 +329,7 @@ class ArtworkProcessor(object):
 
         if auto:
             existingart = dict(mediaitem.art)
-            selectedart = dict((key, image['url']) for key, image in mediaitem.forcedart.iteritems())
+            selectedart = dict((key, image['url']) for key, image in mediaitem.forcedart.items())
             existingart.update(selectedart)
 
             # Then add the rest of the missing art
@@ -432,7 +432,7 @@ class ArtworkProcessor(object):
             if artinfo['multiselect']:
                 existingurls = []
                 existingartnames = []
-                for art, url in existingart.iteritems():
+                for art, url in existingart.items():
                     if info.arttype_matches_base(art, missingart) and url:
                         existingurls.append(url)
                         existingartnames.append(art)
@@ -485,13 +485,13 @@ def add_art_to_library(mediatype, seasons, dbid, selectedart):
         if arttype.startswith('animated') and url and url.startswith('http'):
             selectedart[arttype] = None
     if mediatype == mediatypes.TVSHOW:
-        for season, season_id in seasons.iteritems():
+        for season, season_id in seasons.items():
             info.update_art_in_library(mediatypes.SEASON, season_id, dict((arttype.split('.')[2], url)
-                                                                          for arttype, url in selectedart.iteritems() if
+                                                                          for arttype, url in selectedart.items() if
                                                                           arttype.startswith(
                                                                               'season.{0}.'.format(season))))
         info.update_art_in_library(mediatype, dbid, dict((arttype, url)
-                                                         for arttype, url in selectedart.iteritems() if
+                                                         for arttype, url in selectedart.items() if
                                                          '.' not in arttype))
     else:
         info.update_art_in_library(mediatype, dbid, selectedart)
@@ -537,7 +537,7 @@ def is_excluded(mediaitem):
 
 def tag_forcedandexisting_art(availableart, forcedart, existingart):
     typeinsert = {}
-    for exacttype, artlist in sorted(forcedart.iteritems(), key=lambda _arttype: natural_sort(_arttype[0])):
+    for exacttype, artlist in sorted(forcedart.items(), key=lambda _arttype: natural_sort(_arttype[0])):
         arttype = info.get_basetype(exacttype)
         if arttype not in availableart:
             availableart[arttype] = artlist
@@ -554,7 +554,7 @@ def tag_forcedandexisting_art(availableart, forcedart, existingart):
                     availableart[arttype].insert(typeinsert[arttype], image)
 
     typeinsert = {}
-    for exacttype, existingurl in existingart.iteritems():
+    for exacttype, existingurl in existingart.items():
         arttype = info.get_basetype(exacttype)
         if arttype in availableart:
             match = next((available for available in availableart[arttype] if available['url'] == existingurl), None)

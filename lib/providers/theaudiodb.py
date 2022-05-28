@@ -73,13 +73,13 @@ class TheAudioDBMusicVideoProvider(TheAudioDBAbstractProvider):
         images = {}
         for idsource, artdata in list(self.artmap.items()):
             if idsource not in uniqueids or types is not None and not \
-                    any(x in types for x in artdata['artmap'].itervalues()):
+                    any(x in types for x in artdata['artmap'].values()):
                 continue
             data = self.get_data(artdata['url'], {'i': uniqueids[idsource]})
             if not data or not data.get(artdata['datakey']):
                 continue
             data = data[artdata['datakey']][0]
-            for originaltype, finaltype in artdata['artmap'].iteritems():
+            for originaltype, finaltype in artdata['artmap'].items():
                 if originaltype in ('strAlbumThumbBack', 'strAlbumSpine'):
                     continue
                 if originaltype == 'strArtistThumb':
@@ -100,7 +100,7 @@ class TheAudioDBAbstractMusicProvider(TheAudioDBAbstractProvider, ABC):
         if not uniqueids.get(idsource):
             return {}
         artdata = self.artmap[idsource]
-        if types and not any(x in types for x in artdata['artmap'].itervalues()):
+        if types and not any(x in types for x in artdata['artmap'].values()):
             return {}
 
         images = {}
@@ -108,7 +108,7 @@ class TheAudioDBAbstractMusicProvider(TheAudioDBAbstractProvider, ABC):
         if not data or not data.get(artdata['datakey']):
             return {}
         data = data[artdata['datakey']][0]
-        for originaltype, finaltype in artdata['artmap'].iteritems():
+        for originaltype, finaltype in artdata['artmap'].items():
             if data.get(originaltype):
                 _insertart(images, finaltype, self._build_image(data[originaltype],
                                                                 _get_imagesize(originaltype), artdata['datakey']))

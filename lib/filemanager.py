@@ -156,7 +156,7 @@ class FileManager(object):
     def remove_deselected_files(self, mediaitem, assignedart=False):
         if self.debug:
             return
-        for arttype, newimage in mediaitem.selectedart.iteritems():
+        for arttype, newimage in mediaitem.selectedart.items():
             if newimage is not None:
                 continue
             if assignedart:

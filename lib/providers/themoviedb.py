@@ -58,7 +58,7 @@ class TheMovieDBAbstractProvider(AbstractImageProvider, ABC):
 
     def process_data(self, data):
         result = {}
-        for arttype, artlist in data.iteritems():
+        for arttype, artlist in data.items():
             if arttype not in self.artmap:
                 continue
             previewbit = 'w300' if arttype in ('backdrops', 'stills') else 'w342'
