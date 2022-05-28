@@ -1,9 +1,10 @@
-import random
-import xbmc
-import xbmcgui
 import os
+import random
 import re
 from datetime import timedelta
+
+import xbmc
+import xbmcgui
 
 from lib import cleaner, reporting
 from lib.artworkselection import prompt_for_artwork

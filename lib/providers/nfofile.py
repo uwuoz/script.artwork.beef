@@ -1,11 +1,12 @@
 import os
 import sys
 import urllib
-import xbmcvfs
 import urllib.parse
+import xml.etree.ElementTree as ET
 from abc import ABCMeta
 from contextlib import closing
-import xml.etree.ElementTree as ET
+
+import xbmcvfs
 
 if sys.version_info < (2, 7):
     from xml.parsers.expat import ExpatError as ParseError

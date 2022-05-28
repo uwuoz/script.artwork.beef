@@ -1,6 +1,7 @@
 import xbmc
 
 from lib.libs import pykodi
+
 try:
     import projectkeys
 except ImportError:

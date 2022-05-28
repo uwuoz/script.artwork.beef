@@ -1,13 +1,14 @@
 import re
-import xbmc
 from math import pi, sin
 
-from lib.providers import base
-from lib.providers.base import AbstractImageProvider, build_key_error, cache, ProviderError
+import xbmc
+
 from lib.libs import mediatypes
 from lib.libs.addonsettings import settings
 from lib.libs.pykodi import json, UTF8JSONDecoder
 from lib.libs.utils import SortedDisplay
+from lib.providers import base
+from lib.providers.base import AbstractImageProvider, build_key_error, cache, ProviderError
 
 
 class TheTVDBProvider(AbstractImageProvider):

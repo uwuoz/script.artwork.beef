@@ -1,4 +1,5 @@
 import sys
+
 import xbmcgui
 
 from context import get_dbid, get_mediatype

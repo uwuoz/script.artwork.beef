@@ -1,8 +1,9 @@
 import os
 import re
+from functools import wraps
+
 import xbmc
 import xbmcvfs
-from functools import wraps
 
 from lib.libs import mediatypes, pykodi, quickjson, utils
 from lib.libs.addonsettings import settings

@@ -1,9 +1,8 @@
 from lib.libs import mediatypes
-from lib.providers.base import ProviderError
-
 from lib.providers.artfiles import ArtFilesSeriesProvider, ArtFilesMovieProvider, ArtFilesEpisodeProvider, \
     ArtFilesMovieSetProvider, ArtFilesMusicVideoProvider, ArtFilesArtistProvider, ArtFilesAlbumProvider, \
     ArtFilesSongProvider
+from lib.providers.base import ProviderError
 from lib.providers.fanarttv import FanartTVAlbumProvider, FanartTVArtistProvider, FanartTVSeriesProvider, \
     FanartTVMovieProvider, FanartTVMovieSetProvider, FanartTVMusicVideoProvider
 from lib.providers.nfofile import NFOFileSeriesProvider, NFOFileMovieProvider, NFOFileEpisodeProvider, \

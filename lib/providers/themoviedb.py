@@ -1,5 +1,6 @@
-import xbmc
 from abc import ABCMeta, ABC
+
+import xbmc
 
 from lib.libs import mediatypes
 from lib.libs.addonsettings import settings

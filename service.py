@@ -1,5 +1,6 @@
-import xbmc
 from itertools import chain
+
+import xbmc
 
 from lib.artworkprocessor import ArtworkProcessor
 from lib.libs import mediainfo as info, mediatypes, pykodi, quickjson

@@ -1,7 +1,9 @@
 import sys
+
 import xbmc
 
 from lib.artworkprocessor import ArtworkProcessor
+
 
 # DEPRECATED: StringCompare in addon.xml is deprecated in Krypton, gone in Leia,
 #  but both resolve to False when unrecognized so the result is the same for all versions

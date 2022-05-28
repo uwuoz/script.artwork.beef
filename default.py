@@ -1,7 +1,8 @@
 import sys
+from itertools import chain
+
 import xbmc
 import xbmcgui
-from itertools import chain
 
 from lib import advancedsettings, cleaner, reporting
 from lib.artworkprocessor import ArtworkProcessor

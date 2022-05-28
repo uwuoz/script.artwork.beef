@@ -2,12 +2,11 @@ import os
 import re
 import threading
 import urllib
-
 import urllib.parse as urlparse
+from contextlib import closing
 
 import xbmc
 import xbmcvfs
-from contextlib import closing
 
 from lib import cleaner
 from lib.libs import mediainfo as info, mediatypes, pykodi, quickjson, utils

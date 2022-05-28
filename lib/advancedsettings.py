@@ -1,8 +1,9 @@
+import xml.etree.ElementTree as ET
+from contextlib import closing
+
 import xbmc
 import xbmcgui
 import xbmcvfs
-import xml.etree.ElementTree as ET
-from contextlib import closing
 
 from lib.libs.pykodi import log, localize as L
 

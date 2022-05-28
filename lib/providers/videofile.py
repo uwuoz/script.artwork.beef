@@ -4,7 +4,6 @@ import urllib.parse
 from abc import ABCMeta
 
 from lib.libs import mediatypes
-from lib.libs.addonsettings import settings
 from lib.libs.pykodi import localize as L
 from lib.libs.utils import SortedDisplay, get_movie_path_list
 

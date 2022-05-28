@@ -1,5 +1,5 @@
-import os
 import codecs
+import os
 
 # https://github.com/janpipek/iso639-python
 

@@ -1,6 +1,7 @@
 import os
-import xbmcvfs
 from abc import ABCMeta
+
+import xbmcvfs
 
 from lib.libs import mediatypes
 from lib.libs.addonsettings import settings

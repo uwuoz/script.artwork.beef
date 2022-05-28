@@ -1,16 +1,15 @@
 import collections
+import json
 import os
 import re
 import sys
 import time
 import urllib
 import urllib.parse
-import xbmc
-import xbmcaddon
 from datetime import datetime
 
-
-import json
+import xbmc
+import xbmcaddon
 
 try:
     datetime.strptime('2112-04-01', '%Y-%m-%d')

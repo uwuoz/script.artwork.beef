@@ -1,14 +1,15 @@
 import re
 import urllib
 import urllib.parse
-import xbmc
 from abc import ABCMeta, abstractmethod
 
-from lib.providers.base import AbstractImageProvider, cache, build_key_error
+import xbmc
+
 from lib.libs import mediatypes
 from lib.libs.addonsettings import settings
 from lib.libs.pykodi import json, UTF8JSONDecoder
 from lib.libs.utils import SortedDisplay
+from lib.providers.base import AbstractImageProvider, cache, build_key_error
 
 
 class FanartTVAbstractProvider(AbstractImageProvider):

@@ -1,6 +1,7 @@
+from abc import ABCMeta, abstractmethod
+
 import StorageServer
 import xbmc
-from abc import ABCMeta, abstractmethod
 from requests.packages import urllib3
 
 from lib.libs.addonsettings import settings

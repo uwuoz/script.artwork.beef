@@ -1,10 +1,11 @@
 import urllib
-import xbmcvfs
 import urllib.parse
 
+import xbmcvfs
+
 from lib.libs import pykodi, mediatypes, quickjson
-from lib.libs.mediainfo import iter_base_arttypes, fill_multiart, keep_arttype
 from lib.libs.addonsettings import settings
+from lib.libs.mediainfo import iter_base_arttypes, fill_multiart, keep_arttype
 
 # 0=original URLs, 1=new URL, 2=URL match
 old_urls_fix = dict(tvdb=(

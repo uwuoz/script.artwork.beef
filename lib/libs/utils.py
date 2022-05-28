@@ -1,7 +1,8 @@
 import re
-import xbmc
 from collections import namedtuple
 from os.path import split, basename, dirname
+
+import xbmc
 
 from lib.libs.pykodi import log
 

@@ -1,9 +1,9 @@
 import re
+
 import xbmc
 import xbmcgui
 
 from lib.libs import mediatypes
-from lib.libs.addonsettings import settings
 from lib.libs.pykodi import localize as L
 
 SEASON_NUMBER = 32002
