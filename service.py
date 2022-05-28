@@ -127,7 +127,7 @@ class ArtworkService(xbmc.Monitor):
     def abortRequested(self):
         return self.waitForAbort(0.0001)
 
-    def waitForAbort(self, timeout=0):
+    def waitForAbort(self, timeout=float(0)):
         return self.abort or super(ArtworkService, self).waitForAbort(timeout)
 
     def really_waitforabort(self, timeout=0):

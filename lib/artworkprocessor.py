@@ -125,6 +125,7 @@ class ArtworkProcessor(object):
     def process_item(self, mediatype, dbid, mode):
         if self.processor_busy:
             return
+        busy = ''
         if mode == MODE_DEBUG:
             mode = MODE_AUTO
             self.set_debug(True)
@@ -343,7 +344,7 @@ class ArtworkProcessor(object):
                 error = error or er
                 toset.update(mediaitem.downloadedart)
             if toset:
-                mediaitem.updatedart = list(set(mediaitem.updatedart + toset.keys()))
+                mediaitem.updatedart = list(set(toset.keys()))
                 if not self.debug:
                     add_art_to_library(mediatype, mediaitem.seasons, mediaitem.dbid, toset)
             self.cachelocal(mediaitem, toset)

@@ -9,7 +9,6 @@ import xbmc
 import xbmcaddon
 from datetime import datetime
 
-from past.types import basestring
 
 import json
 
@@ -71,7 +70,7 @@ def get_kodi_version():
 
 
 def localize(messageid):
-    if isinstance(messageid, basestring):
+    if isinstance(messageid, str):
         result = messageid
     elif 32000 <= messageid < 33000:
         result = get_main_addon().getLocalizedString(messageid)
@@ -237,12 +236,12 @@ class Addon(xbmcaddon.Addon):
         return result
 
     def set_setting(self, settingid, value):
-        if settingid.endswith('_list') and not isinstance(value, basestring) \
+        if settingid.endswith('_list') and not isinstance(value, str) \
                 and isinstance(value, collections.Sequence):
             value = '|'.join(value)
         elif isinstance(value, bool):
             value = 'true' if value else 'false'
-        elif not isinstance(value, basestring):
+        elif not isinstance(value, str):
             value = str(value)
         self.setSetting(settingid, value)
 

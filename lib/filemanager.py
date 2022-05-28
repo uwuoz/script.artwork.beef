@@ -15,8 +15,6 @@ from lib.libs.addonsettings import settings
 from lib.libs.pykodi import localize as L, log
 from lib.libs.webhelper import Getter, GetterError
 
-from past.types import basestring
-
 CANT_CONTACT_PROVIDER = 32034
 HTTP_ERROR = 32035
 CANT_WRITE_TO_FILE = 32037
@@ -169,7 +167,7 @@ class FileManager(object):
             if not oldimage:
                 continue
             old_url = oldimage['url'] if isinstance(oldimage, dict) else \
-                oldimage if isinstance(oldimage, basestring) else oldimage[0]['url']
+                oldimage if isinstance(oldimage, str) else oldimage[0]['url']
             if not old_url or old_url.startswith(pykodi.notimagefiles) \
                     or old_url in mediaitem.selectedart.values() or not xbmcvfs.exists(old_url):
                 continue

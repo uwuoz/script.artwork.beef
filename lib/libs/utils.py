@@ -8,7 +8,7 @@ from lib.libs.pykodi import log
 SortedDisplay = namedtuple('SortedDisplay', ['sort', 'display'])
 
 
-def natural_sort(string, split_regex=re.compile(r'(\d+)')):
+def natural_sort(string, split_regex=re.compile(r"(\d+)")):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(split_regex, string)]
 
 
@@ -26,10 +26,10 @@ def get_simpledict_updates(original, newdict):
 
 
 # TODO: Load from advancedsettings.xml
-moviestacking = [re.compile(r'(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*\d+)(.*?)(\.[^.]+)$', re.IGNORECASE),
-    re.compile(r'(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*[a-d])(.*?)(\.[^.]+)$', re.IGNORECASE),
-    re.compile(r'(.*?)([ ._-]*[a-d])(.*?)(\.[^.]+)$', re.IGNORECASE)
-]
+moviestacking = (re.compile(r"(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*\d+)(.*?)(\.[^.]+)$", re.IGNORECASE),
+                 re.compile(r"(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*[a-d])(.*?)(\.[^.]+)$", re.IGNORECASE),
+                 re.compile(r"(.*?)([ ._-]*[a-d])(.*?)(\.[^.]+)$", re.IGNORECASE)
+                 )
 
 
 def get_movie_path_list(stackedpath):

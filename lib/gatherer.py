@@ -41,7 +41,7 @@ class Gatherer(object):
             if 'poster' not in mediaitem.availableart:
                 mediaitem.availableart['poster'] = []
             mediaitem.availableart['poster'].extend(mediaitem.availableart['keyart'])
-        for arttype, imagelist in mediaitem.availableart.iteritems():
+        for arttype, imagelist in list(mediaitem.availableart.items()):
             _sort_images(arttype, imagelist, mediaitem.sourcemedia, mediaitem.mediatype)
         return services_hit, error
 

@@ -138,6 +138,8 @@ def indent(element, level=0):
 
 class CommentedTreeBuilder(ET.TreeBuilder):
     def comment(self, data):
+        if ET.Comment is None:
+            ET.Comment = ''
         self.start(ET.Comment, {})
         self.data(data)
         self.end(ET.Comment)
