@@ -15,6 +15,7 @@ ALBUM_CHUNK_SIZE = 200
 
 addon = pykodi.get_main_addon()
 
+
 class ArtworkService(xbmc.Monitor):
     def __init__(self):
         super(ArtworkService, self).__init__()
@@ -198,26 +199,26 @@ class ArtworkService(xbmc.Monitor):
     def watchitem(self, data):
         can_use_data = 'item' in data and data['item'].get('id') and data['item'].get('id') != -1
         return can_use_data and 'playcount' not in data and data['item'].get('type') in self.recentvideos \
-            and (pykodi.get_kodi_version() < 18 or data.get('added'))
+               and (pykodi.get_kodi_version() < 18 or data.get('added'))
 
     def process_allvideos(self, shouldinclude_fn=None):
         allvideos = self.check_allepisodes
         if not shouldinclude_fn:
             allvideos = True
-            shouldinclude_fn = lambda id, type, label: True
+            shouldinclude_fn = lambda _id, _type, label: True
         items = []
         if not mediatypes.disabled(mediatypes.MOVIESET):
             items.extend(info.MediaItem(mset) for mset in chain.from_iterable(
-                    quickjson.gen_chunked_item_list(mediatypes.MOVIESET))
-                if shouldinclude_fn(mset['setid'], mediatypes.MOVIESET, mset['label']))
+                quickjson.gen_chunked_item_list(mediatypes.MOVIESET))
+                         if shouldinclude_fn(mset['setid'], mediatypes.MOVIESET, mset['label']))
         if not mediatypes.disabled(mediatypes.MOVIE):
             items.extend(info.MediaItem(movie) for movie in chain.from_iterable(
-                    quickjson.gen_chunked_item_list(mediatypes.MOVIE))
-                if shouldinclude_fn(movie['movieid'], mediatypes.MOVIE, movie['label']))
+                quickjson.gen_chunked_item_list(mediatypes.MOVIE))
+                         if shouldinclude_fn(movie['movieid'], mediatypes.MOVIE, movie['label']))
         if not mediatypes.disabled(mediatypes.MUSICVIDEO):
             items.extend(info.MediaItem(mvid) for mvid in chain.from_iterable(
-                    quickjson.gen_chunked_item_list(mediatypes.MUSICVIDEO))
-                if shouldinclude_fn(mvid['musicvideoid'], mediatypes.MUSICVIDEO, info.build_music_label(mvid)))
+                quickjson.gen_chunked_item_list(mediatypes.MUSICVIDEO))
+                         if shouldinclude_fn(mvid['musicvideoid'], mediatypes.MUSICVIDEO, info.build_music_label(mvid)))
 
         serieslist = quickjson.get_tvshows()
         if self.abortRequested():
@@ -226,7 +227,7 @@ class ArtworkService(xbmc.Monitor):
             for series in serieslist:
                 processed_season = self.processed.get_data(series['tvshowid'], mediatypes.TVSHOW, series['label'])
                 if not processed_season or series['season'] > int(processed_season) \
-                or shouldinclude_fn(series['tvshowid'], mediatypes.TVSHOW, series['label']):
+                        or shouldinclude_fn(series['tvshowid'], mediatypes.TVSHOW, series['label']):
                     items.append(info.MediaItem(series))
                 if self.abortRequested():
                     return False
@@ -234,7 +235,7 @@ class ArtworkService(xbmc.Monitor):
             seriesmap = dict((s['tvshowid'], s['imdbnumber']) for s in serieslist)
             episodes = []
             for episodelist in (quickjson.gen_chunked_item_list(mediatypes.EPISODE)
-                    if allvideos else [quickjson.get_episodes(limit=500)]):
+            if allvideos else [quickjson.get_episodes(limit=500)]):
                 for episode in episodelist:
                     ep = info.MediaItem(episode)
                     if seriesmap.get(ep.tvshowid) in settings.autoadd_episodes or include_episode(ep):
@@ -274,7 +275,7 @@ class ArtworkService(xbmc.Monitor):
             episode = info.MediaItem(quickjson.get_item_details(episodeid, mediatypes.EPISODE))
             series = None
             if not mediatypes.disabled(mediatypes.TVSHOW) and episode.tvshowid not in seriesadded \
-            and episode.season > self.processed.get_data(episode.tvshowid, mediatypes.TVSHOW, episode.label):
+                    and episode.season > self.processed.get_data(episode.tvshowid, mediatypes.TVSHOW, episode.label):
                 seriesadded.add(episode.tvshowid)
                 series = info.MediaItem(quickjson.get_item_details(episode.tvshowid, mediatypes.TVSHOW))
                 newitems.append(series)
@@ -309,22 +310,23 @@ class ArtworkService(xbmc.Monitor):
         if mediatypes.disabled(mediatypes.ALBUM) and mediatypes.disabled(mediatypes.ARTIST):
             return True
         if not shouldinclude_fn:
-            shouldinclude_fn = lambda id, type, label: True
+            shouldinclude_fn = lambda _id, _type, label: True
         albums = []
         if not mediatypes.disabled(mediatypes.ALBUM):
             albums.extend(info.MediaItem(album) for album in quickjson.get_albums()
-                if shouldinclude_fn(album['albumid'], mediatypes.ALBUM, info.build_music_label(album)))
+                          if shouldinclude_fn(album['albumid'], mediatypes.ALBUM, info.build_music_label(album)))
         if self.abortRequested():
             return False
         artists = []
         if not mediatypes.disabled(mediatypes.ARTIST):
             artists.extend(info.MediaItem(artist) for artist in quickjson.get_item_list(mediatypes.ARTIST)
-                if shouldinclude_fn(artist['artistid'], mediatypes.ARTIST, artist['label']))
+                           if shouldinclude_fn(artist['artistid'], mediatypes.ARTIST, artist['label']))
         if self.abortRequested():
             return False
         if not albums and not artists:
             return True
-        chunkedalbums = [albums[x:x+ALBUM_CHUNK_SIZE] for x in range(0, len(albums), ALBUM_CHUNK_SIZE)]
+        chunkedalbums = [albums[x:x + ALBUM_CHUNK_SIZE] for x in range(0, len(albums), ALBUM_CHUNK_SIZE)]
+
         def chunk_filler():
             for albumgroup in chunkedalbums:
                 songs = _buildsongs(albumgroup)
@@ -345,8 +347,9 @@ class ArtworkService(xbmc.Monitor):
                         yield False
 
                 yield itemgroup
-            if artists: # New artists that didn't match an album
+            if artists:  # New artists that didn't match an album
                 yield artists
+
         return self.processor.process_chunkedlist(chunk_filler(), len(chunkedalbums))
 
     def onSettingsChanged(self):
@@ -364,29 +367,34 @@ class ArtworkService(xbmc.Monitor):
         else:
             self.processor.close_progress()
 
+
 def get_date():
     return pykodi.get_infolabel('System.Date(yyyy-mm-dd)')
 
+
 def include_any_episode():
     return not mediatypes.disabled(mediatypes.EPISODE) \
-        and (mediatypes.generatethumb(mediatypes.EPISODE) or mediatypes.downloadanyartwork(mediatypes.EPISODE) \
-            or settings.autoadd_episodes)
+           and (mediatypes.generatethumb(mediatypes.EPISODE) or mediatypes.downloadanyartwork(mediatypes.EPISODE)
+                or settings.autoadd_episodes)
+
 
 def include_episode(episode):
     return mediatypes.generatethumb(mediatypes.EPISODE) and not info.item_has_generated_thumbnail(episode) \
-        or info.has_art_todownload(episode.art, mediatypes.EPISODE)
+           or info.has_art_todownload(episode.art, mediatypes.EPISODE)
+
 
 def _buildsongs(albumgroup):
     result = {}
     if mediatypes.disabled(mediatypes.SONG):
         return result
     songfilter = {'field': 'album', 'operator': 'is',
-        'value': [album.label for album in albumgroup]}
+                  'value': [album.label for album in albumgroup]}
     for song in quickjson.get_songs(songfilter=songfilter):
         if song['albumid'] not in result:
             result[song['albumid']] = []
         result[song['albumid']].append(song)
     return result
+
 
 if __name__ == '__main__':
     log('Service started', xbmc.LOGINFO)

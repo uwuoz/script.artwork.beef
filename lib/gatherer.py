@@ -12,6 +12,7 @@ from lib.providers import ProviderError
 MAX_ERRORS = 3
 TOO_MANY_ERRORS = 32031
 
+
 class Gatherer(object):
     def __init__(self, monitor, languages):
         self.monitor = monitor
@@ -27,15 +28,16 @@ class Gatherer(object):
         if skipexisting:
             if not fsonly and mediaitem.uniqueids and mediaitem.missingart:
                 mediaitem.availableart, error = self.get_external_artwork(mediaitem.mediatype, mediaitem.seasons,
-                    mediaitem.uniqueids, mediaitem.missingart)
+                                                                          mediaitem.uniqueids, mediaitem.missingart)
                 services_hit = True
         elif mediaitem.uniqueids:
             mediaitem.availableart, error = self.get_external_artwork(mediaitem.mediatype, mediaitem.seasons,
-                mediaitem.uniqueids)
+                                                                      mediaitem.uniqueids)
             services_hit = True
         # combine keyart to poster if keyart disabled or 'prefer titlefree poster' option enabled
         if 'keyart' in mediaitem.availableart and (settings.titlefree_poster or
-                not mediatypes.get_artinfo(mediaitem.mediatype, 'keyart')['autolimit']):
+                                                   not mediatypes.get_artinfo(mediaitem.mediatype, 'keyart')[
+                                                       'autolimit']):
             if 'poster' not in mediaitem.availableart:
                 mediaitem.availableart['poster'] = []
             mediaitem.availableart['poster'].extend(mediaitem.availableart['keyart'])
@@ -46,7 +48,7 @@ class Gatherer(object):
     def get_forced_artwork(self, mediaitem, allowmutiple=False):
         if not mediaitem.file:
             if mediaitem.mediatype not in mediatypes.audiotypes \
-            or not mediatypes.central_directories[mediatypes.ARTIST]:
+                    or not mediatypes.central_directories[mediatypes.ARTIST]:
                 return {}
         if mediaitem.borked_filename:
             return {}
@@ -88,9 +90,9 @@ class Gatherer(object):
                 if errcount != 1 and errcount != MAX_ERRORS:
                     continue
                 error = {'providername': provider.name.display}
-                if errcount == 1: # notify on first error
+                if errcount == 1:  # notify on first error
                     error['message'] = getattr(ex, 'message', repr(ex))
-                elif errcount == MAX_ERRORS: # and on last error when we're no longer going to try this provider
+                elif errcount == MAX_ERRORS:  # and on last error when we're no longer going to try this provider
                     error['message'] = L(TOO_MANY_ERRORS)
                 if not isinstance(ex, ProviderError):
                     log("Error parsing provider response", xbmc.LOGWARNING)
@@ -109,6 +111,7 @@ class Gatherer(object):
                 break
         return images, error
 
+
 def _sort_images(basearttype, imagelist, mediasource, mediatype):
     # 1. Language, preferring fanart with no language/title if configured
     # 2. Match discart to media source
@@ -119,13 +122,16 @@ def _sort_images(basearttype, imagelist, mediasource, mediatype):
     imagelist.sort(key=_size_sort, reverse=True)
     if basearttype == 'discart':
         if mediasource != 'unknown':
-            imagelist.sort(key=lambda image: 0 if image.get('subtype', SortedDisplay(None, '')).sort == mediasource else 1)
+            imagelist.sort(
+                key=lambda image: 0 if image.get('subtype', SortedDisplay(None, '')).sort == mediasource else 1)
     imagelist.sort(key=lambda image: _preferredsource_sort(image, mediatype), reverse=True)
     imagelist.sort(key=lambda image: _imagelanguage_sort(image, basearttype))
+
 
 def _preferredsource_sort(image, mediatype):
     result = 1 if mediatypes.ispreferred_source(mediatype, image['provider'][0]) else 0
     return result
+
 
 def _size_sort(image):
     imagesplit = image['size'].display.split('x')
@@ -142,6 +148,7 @@ def _size_sort(image):
         shrink = settings.preferredsize[1] / float(imagesize[1])
         imagesize = imagesize[0] * shrink, settings.preferredsize[1]
     return max(imagesize) // 200
+
 
 def _imagelanguage_sort(image, basearttype):
     if not providers.base.languages:

@@ -14,6 +14,7 @@ CHOOSE_ART_HEADER = 32051
 REFRESH_ITEM = 32409
 AVAILABLE_COUNT = 32006
 
+
 def prompt_for_artwork(mediatype, medialabel, availableart, monitor):
     if not availableart:
         return None, None
@@ -31,8 +32,8 @@ def prompt_for_artwork(mediatype, medialabel, availableart, monitor):
         if arttype not in (at['arttype'] for at in arttypes):
             arttypes.append({'arttype': arttype, 'label': label, 'count': len(artlist)})
     arttypes.sort(key=lambda art: sort_arttype(art['arttype']))
-    typeselectwindow = ArtworkTypeSelector('DialogSelect.xml', settings.addon_path, arttypes=arttypes,
-        medialabel=medialabel, show_refresh=mediatype in mediatypes.require_manualid)
+    typeselectwindow = ArtworkTypeSelector(arttypes=arttypes,
+                                           medialabel=medialabel, show_refresh=mediatype in mediatypes.require_manualid)
     selectedarttype = None
     selectedart = None
     typelist = [at['arttype'] for at in arttypes]
@@ -44,13 +45,14 @@ def prompt_for_artwork(mediatype, medialabel, availableart, monitor):
         if not selectedarttype:
             break
         multi = mediatypes.get_artinfo(mediatype, selectedarttype)['multiselect']
-        artselectwindow = ArtworkSelector('DialogSelect.xml', settings.addon_path, artlist=availableart[selectedarttype],
-            arttype=selectedarttype, medialabel=medialabel, multi=multi)
+        artselectwindow = ArtworkSelector(artlist=availableart[selectedarttype],
+                                          arttype=selectedarttype, medialabel=medialabel, multi=multi)
         selectedart = artselectwindow.prompt()
     return selectedarttype, selectedart
 
+
 class ArtworkTypeSelector(xbmcgui.WindowXMLDialog):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         super(ArtworkTypeSelector, self).__init__()
         self.arttypes = kwargs.get('arttypes')
         self.medialabel = kwargs.get('medialabel')
@@ -97,8 +99,9 @@ class ArtworkTypeSelector(xbmcgui.WindowXMLDialog):
         elif controlid == 7:
             self.close()
 
+
 class ArtworkSelector(xbmcgui.WindowXMLDialog):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         super(ArtworkSelector, self).__init__()
         self.arttype = kwargs.get('arttype')
         if self.arttype.startswith('season.'):
@@ -113,9 +116,9 @@ class ArtworkSelector(xbmcgui.WindowXMLDialog):
         self.selected = None
 
     def prompt(self):
-        '''Returns a single url if not multi,
+        """Returns a single url if not multi,
             else a tuple with item 0 a list of added urls, 1 a list of removed urls,
-            None if cancelled'''
+            None if cancelled"""
         self.doModal()
         return self.selected
 
@@ -204,6 +207,7 @@ class ArtworkSelector(xbmcgui.WindowXMLDialog):
             self.selected = None
             self.close()
 
+
 def get_seasonlabel(arttype):
     season = arttype.split('.')
     if season[1] == '0':
@@ -211,7 +215,8 @@ def get_seasonlabel(arttype):
     elif season[1] != '-1':
         return '{0}: {1}'.format(L(SEASON_NUMBER).format(season[1]), season[2])
 
-def sort_arttype(arttype, naturalsortresplit=re.compile('([0-9]+)')):
+
+def sort_arttype(arttype, naturalsortresplit=re.compile(r'(\d+)')):
     result = []
     if arttype.startswith('season.0'):
         result.append(u'\u9999')

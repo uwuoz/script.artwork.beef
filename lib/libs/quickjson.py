@@ -16,8 +16,10 @@ typemap = {mediatypes.MOVIE: ('Movie', ['art', 'imdbnumber', 'file', 'premiered'
     mediatypes.SONG: ('Song', ['art', 'musicbrainztrackid', 'musicbrainzalbumartistid', 'album',
         'albumartist', 'albumartistid', 'albumid', 'file', 'disc', 'artist', 'title'], None)}
 
+
 def _needupgrade(mediatype):
     return mediatype in (mediatypes.MOVIE, mediatypes.TVSHOW) and get_kodi_version() < 17
+
 
 def _upgradeproperties():
     if get_kodi_version() < 17:
@@ -26,7 +28,9 @@ def _upgradeproperties():
         typemap[mediatypes.MOVIE][1].remove('uniqueid')
         typemap[mediatypes.MOVIE][1].append('year')
 
+
 _upgradeproperties()
+
 
 def _upgradeitem(mediaitem, mediatype):
     if mediatype == mediatypes.MOVIE:
@@ -37,6 +41,7 @@ def _upgradeitem(mediaitem, mediatype):
             mediaitem['uniqueid'] = {'unknown': mediaitem['imdbnumber']}
         else:
             mediaitem['uniqueid'] = {}
+
 
 def get_item_details(dbid, mediatype):
     assert mediatype in typemap
@@ -57,6 +62,7 @@ def get_item_details(dbid, mediatype):
             _upgradeitem(result, mediatype)
         return result
 
+
 def get_item_list(mediatype, extraparams=None, overrideprops=None):
     json_request, json_result = _inner_get_item_list(mediatype, extraparams, overrideprops)
 
@@ -64,6 +70,7 @@ def get_item_list(mediatype, extraparams=None, overrideprops=None):
     if not check_json_result(json_result, result_key, json_request):
         return []
     return _inner_get_result(json_result, mediatype)
+
 
 def _inner_get_item_list(mediatype, extraparams=None, overrideprops=None):
     assert mediatype in typemap
@@ -78,12 +85,14 @@ def _inner_get_item_list(mediatype, extraparams=None, overrideprops=None):
     json_result = pykodi.execute_jsonrpc(json_request)
     return json_request, json_result
 
+
 def _inner_get_result(json_result, mediatype):
     result = json_result['result'][mediatype + 's']
     if _needupgrade(mediatype):
         for movie in result:
             _upgradeitem(movie, mediatype)
     return result
+
 
 def gen_chunked_item_list(mediatype, extraparams=None, overrideprops=None, chunksize=1000):
     if mediatype == mediatypes.EPISODE:
@@ -107,6 +116,7 @@ def gen_chunked_item_list(mediatype, extraparams=None, overrideprops=None, chunk
 
         yield _inner_get_result(json_result, mediatype)
 
+
 def get_albums(artistname=None, dbid=None):
     if artistname is None or dbid is None:
         return get_item_list(mediatypes.ALBUM)
@@ -116,9 +126,11 @@ def get_albums(artistname=None, dbid=None):
         {'field': 'artist', 'operator': 'is', 'value': artistname}})
     return [album for album in allalbums if album['artistid'] and album['artistid'][0] == dbid]
 
+
 def get_artists_byname(artistname):
     return get_item_list(mediatypes.ARTIST,
            {'filter': {"field": "artist", "operator": "is", "value": artistname}}, [])
+
 
 def get_songs(mediatype=None, dbid=None, songfilter=None):
     if songfilter is None and (mediatype is None or dbid is None):
@@ -126,6 +138,7 @@ def get_songs(mediatype=None, dbid=None, songfilter=None):
     if not songfilter:
         songfilter = {mediatype + 'id': dbid}
     return get_item_list(mediatypes.SONG, {'filter': songfilter})
+
 
 def get_tvshows(moreprops=False, includeprops=True):
     json_request = get_base_json_request('VideoLibrary.GetTVShows')
@@ -144,6 +157,7 @@ def get_tvshows(moreprops=False, includeprops=True):
     else:
         return []
 
+
 def get_episodes(tvshow_id=None, limit=None):
     params = {'sort': {'method': 'dateadded', 'order': 'descending'}}
     if tvshow_id:
@@ -152,11 +166,13 @@ def get_episodes(tvshow_id=None, limit=None):
         params['limits'] = {'end': limit}
     return get_item_list(mediatypes.EPISODE, params, typemap[mediatypes.EPISODE][1])
 
+
 def get_seasons(tvshow_id=-1):
     if tvshow_id == -1 and pykodi.get_kodi_version() < 17:
         return _get_all_seasons_jarvis()
     else:
         return _inner_get_seasons(tvshow_id)
+
 
 def _inner_get_seasons(tvshow_id=-1):
     json_request = get_base_json_request('VideoLibrary.GetSeasons')
@@ -171,10 +187,12 @@ def _inner_get_seasons(tvshow_id=-1):
     else:
         return []
 
+
 def _get_all_seasons_jarvis():
     # DEPRECATED: Jarvis won't give me all seasons in one request, gotta do it the long way
     result = list(chain.from_iterable(_inner_get_seasons(tvshow['tvshowid']) for tvshow in get_tvshows(False, False)))
     return result
+
 
 def set_item_details(dbid, mediatype, **details):
     assert mediatype in typemap
@@ -189,6 +207,7 @@ def set_item_details(dbid, mediatype, **details):
     if not check_json_result(json_result, 'OK', json_request):
         log(json_result)
 
+
 def get_textures(url=None):
     json_request = get_base_json_request('Textures.GetTextures')
     json_request['params']['properties'] = ['url']
@@ -201,6 +220,7 @@ def get_textures(url=None):
     else:
         return []
 
+
 def remove_texture(textureid):
     json_request = get_base_json_request('Textures.RemoveTexture')
     json_request['params']['textureid'] = textureid
@@ -209,13 +229,16 @@ def remove_texture(textureid):
     if not check_json_result(json_result, 'OK', json_request):
         log(json_result)
 
+
 def remove_texture_byurl(url):
     textures = get_textures(url)
     for texture in textures:
         remove_texture(texture['textureid'])
 
+
 def get_base_json_request(method):
     return {'jsonrpc': '2.0', 'method': method, 'params': {}, 'id': 1}
+
 
 def get_application_properties(properties):
     json_request = get_base_json_request('Application.GetProperties')
@@ -224,6 +247,7 @@ def get_application_properties(properties):
     if check_json_result(json_result, None, json_request):
         return json_result['result']
 
+
 def get_settingvalue(setting):
     json_request = get_base_json_request('Settings.GetSettingValue')
     json_request['params']['setting'] = setting
@@ -231,14 +255,17 @@ def get_settingvalue(setting):
     if check_json_result(json_result, None, json_request):
         return json_result['result']['value']
 
+
 def check_json_result(json_result, result_key, json_request):
     if 'error' in json_result:
         raise JSONException(json_request, json_result)
 
     return 'result' in json_result and (not result_key or result_key in json_result['result'])
 
+
 class JSONException(Exception):
     def __init__(self, json_request, json_result):
+        self.message = None
         self.json_request = json_request
         self.json_result = json_result
 

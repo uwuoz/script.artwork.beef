@@ -2,6 +2,7 @@ import os
 import sys
 import urllib
 import xbmcvfs
+import urllib.parse
 from abc import ABCMeta
 from contextlib import closing
 import xml.etree.ElementTree as ET
@@ -16,21 +17,18 @@ from lib.libs.utils import SortedDisplay, get_movie_path_list
 
 NFO_FILE = 32003
 
+
 class NFOFileAbstractProvider(object):
     __metaclass__ = ABCMeta
     name = SortedDisplay('file:nfo', NFO_FILE)
 
     def build_resultimage(self, url, title):
-        if isinstance(url, unicode):
-            url = url.encode('utf-8')
         if url.startswith('http'):
-            url = urllib.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
-        resultimage = {'url': url, 'provider': self.name, 'preview': url}
-        resultimage['title'] = '<{0}>'.format(title)
-        resultimage['rating'] = SortedDisplay(0, '')
-        resultimage['size'] = SortedDisplay(0, '')
-        resultimage['language'] = 'xx'
+            url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+        resultimage = {'url': url, 'provider': self.name, 'preview': url, 'title': '<{0}>'.format(title),
+                       'rating': SortedDisplay(0, ''), 'size': SortedDisplay(0, ''), 'language': 'xx'}
         return resultimage
+
 
 class NFOFileSeriesProvider(NFOFileAbstractProvider):
     mediatype = mediatypes.TVSHOW
@@ -63,6 +61,7 @@ class NFOFileSeriesProvider(NFOFileAbstractProvider):
                 result[arttype] = self.build_resultimage(artelement.text.strip(), arttype)
         return result
 
+
 class NFOFileMovieProvider(NFOFileAbstractProvider):
     mediatype = mediatypes.MOVIE
 
@@ -88,6 +87,7 @@ class NFOFileMovieProvider(NFOFileAbstractProvider):
             if arttype.isalnum() and url:
                 result[arttype] = self.build_resultimage(url, arttype)
         return result
+
 
 class NFOFileMovieSetProvider(NFOFileAbstractProvider):
     mediatype = mediatypes.MOVIESET
@@ -116,6 +116,7 @@ class NFOFileMovieSetProvider(NFOFileAbstractProvider):
                 result[arttype] = self.build_resultimage(url, arttype)
         return result
 
+
 class NFOFileEpisodeProvider(NFOFileAbstractProvider):
     mediatype = mediatypes.EPISODE
 
@@ -132,6 +133,7 @@ class NFOFileEpisodeProvider(NFOFileAbstractProvider):
             if arttype.isalnum() and url:
                 result[arttype] = self.build_resultimage(url, arttype)
         return result
+
 
 class NFOFileMusicVideoProvider(NFOFileAbstractProvider):
     mediatype = mediatypes.MUSICVIDEO
@@ -156,6 +158,7 @@ class NFOFileMusicVideoProvider(NFOFileAbstractProvider):
                 result[arttype] = self.build_resultimage(url, arttype)
         return result
 
+
 def read_nfofile(filename):
     if not xbmcvfs.exists(filename):
         return None
@@ -168,8 +171,8 @@ def read_nfofile(filename):
         nfofile.seek(0, 0)
         lines = nfofile.read().split('\n')
         while lines and not lines[-1].strip():
-            del lines[-1] # Remove final blank lines
-        if lines: # Remove the line that possibly contains the URL
+            del lines[-1]  # Remove final blank lines
+        if lines:  # Remove the line that possibly contains the URL
             del lines[-1]
         if lines:
             try:

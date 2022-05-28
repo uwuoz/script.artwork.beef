@@ -6,6 +6,7 @@ ACTION_SELECTSERIES = 32400
 
 # TODO: Don't use 'imdbnumber'
 
+
 class SeriesSelector(xbmcgui.WindowXMLDialog):
     def __init__(self, *args, **kwargs):
         super(SeriesSelector, self).__init__(args, kwargs)

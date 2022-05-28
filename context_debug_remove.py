@@ -7,6 +7,7 @@ from lib.filemanager import FileManager
 from lib.libs import quickjson, mediainfo as info
 from lib.libs.pykodi import localize as L
 
+
 def remove_art():
     # TODO: seasons and episodes and whatever like "add missing artwork" does
     listitem = sys.listitem
@@ -26,6 +27,7 @@ def remove_art():
     info.update_art_in_library(mediatype, dbid, mediaitem.selectedart)
     info.remove_local_from_texturecache(mediaitem.art.values(), True)
     xbmcgui.Dialog().notification("Artwork Beef", L(32027).format(len(mediaitem.selectedart)))
+
 
 if __name__ == '__main__':
     remove_art()

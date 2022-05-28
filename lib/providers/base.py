@@ -18,11 +18,11 @@ languages = ()
 cache = StorageServer.StorageServer('script.artwork.beef', 72)
 monitor = xbmc.Monitor()
 
-# Result of `get_images` is dict of lists, keyed on art type
-# {'url': URL, 'language': ISO alpha-2 code, 'rating': SortedDisplay, 'size': SortedDisplay, 'provider': self.name, 'preview': preview URL}
-# 'title': optional image title
-# 'subtype': optional image subtype, like disc dvd/bluray/3d, SortedDisplay
-# language should be None if there is no title on the image
+# Result of `get_images` is dict of lists, keyed on art type {'url': URL, 'language': ISO alpha-2 code,
+# 'rating': SortedDisplay, 'size': SortedDisplay, 'provider': self.name, 'preview': preview URL} 'title': optional
+# image title 'subtype': optional image subtype, like disc dvd/bluray/3d, SortedDisplay language should be None if
+# there is no title on the image
+
 
 class AbstractProvider(object):
     __metaclass__ = ABCMeta
@@ -51,6 +51,7 @@ class AbstractProvider(object):
     def login(self):
         return False
 
+
 def build_key_error(provider):
     info = settings.get_api_config(provider)
     message = "Invalid project API key: "
@@ -60,10 +61,12 @@ def build_key_error(provider):
 
     return ProviderError(message)
 
+
 class AbstractImageProvider(AbstractProvider):
     @abstractmethod
     def get_images(self, uniqueids, types=None):
         pass
+
 
 class ProviderError(Exception):
     def __init__(self, message, cause=None):

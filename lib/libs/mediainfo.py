@@ -23,6 +23,7 @@ idmap = (('episodeid', mediatypes.EPISODE),
     ('albumid', mediatypes.ALBUM),
     ('artistid', mediatypes.ARTIST))
 
+
 class MediaItem(object):
     def __init__(self, jsondata):
         self.label = jsondata['label']
@@ -72,7 +73,7 @@ class MediaItem(object):
 
         self.seasons = None
         self.availableart = {}
-        self.missingart = [] # or build this dynamically?
+        self.missingart = []  # or build this dynamically?
         self.selectedart = {}
         self.forcedart = {}
         self.updatedart = []
@@ -81,33 +82,42 @@ class MediaItem(object):
         self.missingid = False
         self.borked_filename = self.file and '\xef\xbf\xbd' in self.file
 
+
 def build_music_label(jsondata):
     return jsondata['artist'][0] + ' - ' + jsondata['title'] if jsondata.get('artist') else jsondata['title']
+
 
 def is_known_mediatype(jsondata):
     return any(x[0] in jsondata for x in idmap)
 
+
 def get_mediatype_id(jsondata):
     return next((value, jsondata[key]) for key, value in idmap if key in jsondata)
+
 
 def get_own_artwork(jsondata):
     return dict((arttype.lower(), unquoteimage(url)) for arttype, url
         in jsondata['art'].iteritems() if '.' not in arttype)
 
+
 def has_generated_thumbnail(jsondata):
     return jsondata['art'].get('thumb', '').startswith(pykodi.thumbnailimages)
+
 
 def has_art_todownload(artmap, mediatype):
     return next((True for arttype, url in artmap.items()
         if url and url.startswith('http') and mediatypes.downloadartwork(mediatype, arttype)), False)
 
+
 def arttype_matches_base(arttype, basetype):
     return re.match(r'{0}\d*$'.format(basetype), arttype)
+
 
 def iter_urls_for_arttype(art, arttype):
     for exact in sorted(art, key=utils.natural_sort):
         if arttype_matches_base(exact, arttype):
             yield art[exact]
+
 
 def iter_base_arttypes(artkeys):
     usedtypes = set()
@@ -116,6 +126,7 @@ def iter_base_arttypes(artkeys):
         if basetype not in usedtypes:
             yield basetype
             usedtypes.add(basetype)
+
 
 def fill_multiart(original_art, basetype, artchanges=((), ())):
     result = dict(original_art)
@@ -137,8 +148,10 @@ def fill_multiart(original_art, basetype, artchanges=((), ())):
             result[basetype + (str(idx) if idx else '')] = toadd.pop(0)
     return result
 
+
 def item_has_generated_thumbnail(mediaitem):
     return mediaitem.art.get('thumb', '').startswith(pykodi.thumbnailimages)
+
 
 def iter_missing_arttypes(mediaitem, existingart):
     fromtypes = [key for key, url in existingart.iteritems() if url]
@@ -150,7 +163,7 @@ def iter_missing_arttypes(mediaitem, existingart):
                 yield arttype
         else:
             if _has_localart(arttype, existingart, fromtypes):
-                continue # Can't easily tell if existing art matches new URLs, so don't add new on updates
+                continue  # Can't easily tell if existing art matches new URLs, so don't add new on updates
             artcount = sum(1 for art in fromtypes if arttype_matches_base(art, arttype))
             if artcount < artinfo['autolimit']:
                 yield arttype
@@ -174,6 +187,7 @@ def iter_missing_arttypes(mediaitem, existingart):
         if arttype not in mediaitem.skip_artwork and arttype not in fromtypes:
             yield arttype
 
+
 def _has_localart(arttype, existingart, fromtypes):
     for art in fromtypes:
         if not arttype_matches_base(art, arttype):
@@ -182,6 +196,7 @@ def _has_localart(arttype, existingart, fromtypes):
             return True
     return False
 
+
 def keep_arttype(mediatype, arttype, arturl):
     mediatype, arttype = mediatypes.hack_mediaarttype(mediatype, arttype)
     if arttype == 'thumb' and mediatypes.generatethumb(mediatype) \
@@ -189,15 +204,19 @@ def keep_arttype(mediatype, arttype, arturl):
         return True
     return arttype in mediatypes.iter_every_arttype(mediatype)
 
+
 def get_basetype(arttype):
     return arttype.rstrip('0123456789')
+
 
 def format_arttype(basetype, index):
     return "{0}{1}".format(basetype, index if index else '')
 
+
 def update_art_in_library(mediatype, dbid, updatedart):
     if updatedart:
         quickjson.set_item_details(dbid, mediatype, art=updatedart)
+
 
 def remove_local_from_texturecache(urls, include_generated=False):
     exclude = pykodi.remoteimages if include_generated else pykodi.notimagefiles
@@ -205,8 +224,9 @@ def remove_local_from_texturecache(urls, include_generated=False):
         if url and not url.startswith(exclude):
             quickjson.remove_texture_byurl(url)
 
+
 def add_additional_iteminfo(mediaitem, processed, search=None):
-    '''Get more data from the Kodi library, processed items, and look up web service IDs.'''
+    """Get more data from the Kodi library, processed items, and look up web service IDs."""
     if search and mediaitem.mediatype in search:
         search = search[mediaitem.mediatype]
     if mediaitem.mediatype == mediatypes.TVSHOW:
@@ -275,11 +295,13 @@ def add_additional_iteminfo(mediaitem, processed, search=None):
         if folders:
             mediaitem.file, mediaitem.discfolders = folders
 
+
 def add_movieset_movies(mediaitem):
     if not mediaitem.movies:
         mediaitem.movies = quickjson.get_item_details(mediaitem.dbid, mediatypes.MOVIESET)['movies']
     for movie in mediaitem.movies:
         movie['art'] = get_own_artwork(movie)
+
 
 def _get_seasons_artwork(seasons):
     resultseasons = {}
@@ -292,11 +314,13 @@ def _get_seasons_artwork(seasons):
                 resultart['%s.%s.%s' % (mediatypes.SEASON, season['season'], arttype)] = pykodi.unquoteimage(url)
     return resultseasons, resultart
 
+
 def _remove_set_movieposters(mediaitem):
     # Remove artwork Kodi automatically sets from a movie
     add_movieset_movies(mediaitem)
     if any(movie['art'] == mediaitem.art for movie in mediaitem.movies):
         mediaitem.art = {}
+
 
 def _identify_parent_movieset(mediaitem):
     # Identify set folder among movie parent dirs
@@ -310,14 +334,15 @@ def _identify_parent_movieset(mediaitem):
                 mediaitem.file = result
                 return
 
+
 def _identify_album_folders(mediaitem):
     songs = get_cached_songs(mediaitem.albumid)
     folders = set(os.path.dirname(song['file']) for song in songs)
-    if len(folders) == 1: # all songs only in one folder
+    if len(folders) == 1:  # all songs only in one folder
         folder = folders.pop()
         if not _shared_albumfolder(folder):
             return folder + utils.get_pathsep(folder), {}
-    elif len(folders) > 1: # split to multiple folders
+    elif len(folders) > 1:  # split to multiple folders
         discs = {}
         for folder in folders:
             if _shared_albumfolder(folder):
@@ -331,10 +356,12 @@ def _identify_album_folders(mediaitem):
         if commonpath or discs:
             return commonpath, discs
 
+
 def _shared_albumfolder(folder):
     songs = get_cached_songs_bypath(folder + utils.get_pathsep(folder))
     albums = set(song['albumid'] for song in songs)
     return len(albums) > 1
+
 
 def _get_uniqueids(jsondata, mediatype):
     uniqueids = {}
@@ -367,6 +394,7 @@ def _get_uniqueids(jsondata, mediatype):
         uniqueids['mbtrack'] = jsondata['musicbrainztrackid']
     return uniqueids
 
+
 def _get_sourcemedia(mediapath):
     if not mediapath:
         return 'unknown'
@@ -380,13 +408,15 @@ def _get_sourcemedia(mediapath):
         return 'dvd'
     return 'unknown'
 
+
 # REVIEW: there may be other protocols that just can't be written to
 #  xbmcvfs.mkdirs only supports local drives, SMB, and NFS
 blacklisted_protocols = ('plugin', 'http')
 # whitelist startswith would be something like ['smb://', 'nfs://', '/', r'[A-Z]:\\']
 
+
 def can_saveartwork(mediaitem):
-    if not (settings.albumartwithmediafiles and mediaitem.file \
+    if not (settings.albumartwithmediafiles and mediaitem.file
             and mediaitem.mediatype in (mediatypes.ALBUM, mediatypes.SONG)):
         if find_central_infodir(mediaitem):
             return True
@@ -397,6 +427,7 @@ def can_saveartwork(mediaitem):
     if path.startswith(blacklisted_protocols) or mediaitem.borked_filename:
         return False
     return True
+
 
 def build_artwork_basepath(mediaitem, arttype):
     if settings.albumartwithmediafiles and mediaitem.file \
@@ -424,8 +455,10 @@ def build_artwork_basepath(mediaitem, arttype):
         path += 'extrafanart' + sep
     elif use_basefilename:
         path += basename + '-'
-    def snum(num):
-        return '-specials' if num == 0 else '-all' if num == -1 else '{0:02d}'.format(num)
+
+    def snum(_num):
+        return '-specials' if _num == 0 else '-all' if _num == -1 else '{0:02d}'.format(_num)
+
     if mediaitem.mediatype == mediatypes.SEASON:
         path += 'season{0}-{1}'.format(snum(mediaitem.season), arttype)
     elif arttype.startswith('season.'):
@@ -435,6 +468,7 @@ def build_artwork_basepath(mediaitem, arttype):
         path += arttype
     return path
 
+
 def _saveextrafanart(mediatype, arttype):
     if not arttype_matches_base(arttype, 'fanart') or not split_arttype(arttype)[1]:
         return False
@@ -442,6 +476,7 @@ def _saveextrafanart(mediatype, arttype):
         return False
     return settings.save_extrafanart and mediatype in (mediatypes.MOVIE, mediatypes.TVSHOW) \
         or settings.save_extrafanart_mvids and mediatype == mediatypes.MUSICVIDEO
+
 
 def find_central_infodir(mediaitem):
     fromtv = mediaitem.mediatype in (mediatypes.SEASON, mediatypes.EPISODE)
@@ -488,6 +523,7 @@ def find_central_infodir(mediaitem):
     result += final
     return result
 
+
 def _find_existing(basedir, name, uniqueslug=None, mediayear=None, files=False):
     for item in get_cached_listdir(basedir)[1 if files else 0]:
         cleantitle, diryear = xbmc.getCleanMovieTitle(item) if mediayear else (item, '')
@@ -499,6 +535,7 @@ def _find_existing(basedir, name, uniqueslug=None, mediayear=None, files=False):
             if title in (cleantitle, item):
                 return item
     return None
+
 
 def _get_uniqueslug(mediaitem, slug_mediatype):
     if slug_mediatype == mediatypes.ARTIST and mediaitem.artist is not None:
@@ -516,6 +553,7 @@ def _get_uniqueslug(mediaitem, slug_mediatype):
 
 # TODO: refactor to quickjson.JSONCache maybe
 
+
 def cacheit(func):
     @wraps(func)
     def wrapper(*args):
@@ -525,34 +563,44 @@ def cacheit(func):
         return quickcache[key]
     return wrapper
 
+
 @cacheit
 def get_cached_listdir(path):
     return xbmcvfs.listdir(path)
+
 
 @cacheit
 def get_cached_artists(artistname):
     return quickjson.get_artists_byname(artistname)
 
+
 @cacheit
 def get_cached_albums(artistname, dbid):
     return quickjson.get_albums(artistname, dbid)
+
 
 @cacheit
 def get_cached_songs(dbid):
     return quickjson.get_songs(mediatypes.ALBUM, dbid)
 
+
 @cacheit
 def get_cached_songs_bypath(path):
     return quickjson.get_songs(songfilter={'field': 'path', 'operator': 'is', 'value': path})
+
 
 def get_cached_tvshow(dbid):
     tvshows = get_cached_tvshows()
     return next(show for show in tvshows if show['tvshowid'] == dbid)
 
+
 @cacheit
 def get_cached_tvshows():
     return quickjson.get_item_list(mediatypes.TVSHOW)
 
+
 quickcache = {}
+
+
 def clear_cache():
     quickcache.clear()

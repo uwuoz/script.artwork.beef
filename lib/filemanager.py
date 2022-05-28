@@ -2,10 +2,9 @@ import os
 import re
 import threading
 import urllib
-try:
-    import urllib.parse as urlparse
-except ImportError: # py2
-    import urlparse
+
+import urllib.parse as urlparse
+
 import xbmc
 import xbmcvfs
 from contextlib import closing
@@ -15,6 +14,8 @@ from lib.libs import mediainfo as info, mediatypes, pykodi, quickjson, utils
 from lib.libs.addonsettings import settings
 from lib.libs.pykodi import localize as L, log
 from lib.libs.webhelper import Getter, GetterError
+
+from past.types import basestring
 
 CANT_CONTACT_PROVIDER = 32034
 HTTP_ERROR = 32035
@@ -28,11 +29,13 @@ TEMP_DIR = 'special://temp/recycledartwork/'
 
 typemap = {'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif'}
 
+
 # REVIEW: Deleting replaced artwork. If [movie base name]-fanart.jpg exists and AB is
 #  configured for fanart.jpg, downloading a new artwork will save to the short name but
 #  leave the long name, and the next scan will pick up the long name.
 #  ditto scanning 'logo.png' at first and saving new 'clearlogo.png', but clearlogo will be picked
 #  first by the next scan so that's not such a big deal.
+
 
 class FileManager(object):
     def __init__(self, debug=False, bigcache=False):
@@ -47,7 +50,7 @@ class FileManager(object):
 
     def _build_imagecachebase(self):
         result = pykodi.execute_jsonrpc({"jsonrpc": "2.0", "id": 1, "method": "Settings.GetSettings",
-            "params": {"filter": {"category": "control", "section": "services"}}})
+                                         "params": {"filter": {"category": "control", "section": "services"}}})
         port = 80
         username = ''
         password = ''
@@ -168,7 +171,7 @@ class FileManager(object):
             old_url = oldimage['url'] if isinstance(oldimage, dict) else \
                 oldimage if isinstance(oldimage, basestring) else oldimage[0]['url']
             if not old_url or old_url.startswith(pykodi.notimagefiles) \
-            or old_url in mediaitem.selectedart.values() or not xbmcvfs.exists(old_url):
+                    or old_url in mediaitem.selectedart.values() or not xbmcvfs.exists(old_url):
                 continue
             if settings.recycle_removed:
                 recyclefile(old_url)
@@ -187,20 +190,22 @@ class FileManager(object):
         if self.alreadycached is not None:
             if not self.alreadycached:
                 self.alreadycached = [pykodi.unquoteimage(texture['url']) for texture in quickjson.get_textures()
-                    if not pykodi.unquoteimage(texture['url']).startswith(('http', 'image'))]
+                                      if not pykodi.unquoteimage(texture['url']).startswith(('http', 'image'))]
             alreadycached = self.alreadycached
         else:
             alreadycached = [pykodi.unquoteimage(texture['url']) for texture in quickjson.get_textures(urls)]
         count = [0]
-        def worker(path):
+
+        def worker(_path):
             try:
-                res, _ = self.doget(self.imagecachebase + urllib.quote(pykodi.quoteimage(path), ''), stream=True)
+                res, _ = self.doget(self.imagecachebase + urllib.parse.quote(pykodi.quoteimage(_path), ''), stream=True)
                 if res:
                     res.iter_content(chunk_size=1024)
                     res.close()
                     count[0] += 1
             except GetterError:
                 pass
+
         threads = []
         for path in urls:
             if path in alreadycached:
@@ -215,14 +220,17 @@ class FileManager(object):
             t.join()
         return count[0]
 
+
 def extrafanart_name_used(path, localfiles):
     return utils.parent_dir(path) == 'extrafanart' and path in localfiles
+
 
 def get_file_extension(contenttype, request_url, re_search=re.compile(r'\.\w*$')):
     if contenttype in typemap:
         return typemap[contenttype]
     if re.search(re_search, request_url):
         return request_url.rsplit('.', 1)[1]
+
 
 def get_next_filename(full_basefilepath, localfiles):
     nextname = full_basefilepath
@@ -232,6 +240,7 @@ def get_next_filename(full_basefilepath, localfiles):
         nextname = name + chr(char_int) + ext
         char_int += 1
     return nextname
+
 
 def get_downloadable_art(mediaitem, allartwork):
     if allartwork:
@@ -245,11 +254,12 @@ def get_downloadable_art(mediaitem, allartwork):
             del downloadable[arttype]
     return downloadable
 
+
 def get_local_art(mediaitem, allartwork):
     local = []
     if allartwork:
         arts = mediaitem.art if settings.clean_imageurls else \
-            cleaner.clean_artwork(mediaitem) # library URLs not cleaned, but can still help here
+            cleaner.clean_artwork(mediaitem)  # library URLs not cleaned, but can still help here
         for url in arts.values():
             if url and not url.startswith('http'):
                 local.append(url)
@@ -258,6 +268,7 @@ def get_local_art(mediaitem, allartwork):
             local.append(url)
 
     return local
+
 
 def recyclefile(filename):
     firstdir = utils.parent_dir(filename)
@@ -271,6 +282,7 @@ def recyclefile(filename):
     recycled_filename = directory + pathsep + os.path.basename(filename)
     if not xbmcvfs.copy(filename, recycled_filename):
         raise FileError(L(CANT_WRITE_TO_FILE).format(recycled_filename))
+
 
 class FileError(Exception):
     def __init__(self, message, cause=None):

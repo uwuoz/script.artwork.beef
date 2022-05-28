@@ -1,5 +1,6 @@
 import re
 import urllib
+import urllib.parse
 import xbmc
 from abc import ABCMeta, abstractmethod
 
@@ -8,6 +9,7 @@ from lib.libs import mediatypes
 from lib.libs.addonsettings import settings
 from lib.libs.pykodi import json, UTF8JSONDecoder
 from lib.libs.utils import SortedDisplay
+
 
 class FanartTVAbstractProvider(AbstractImageProvider):
     __metaclass__ = ABCMeta
@@ -57,11 +59,11 @@ class FanartTVAbstractProvider(AbstractImageProvider):
         raise build_key_error('fanarttv')
 
     def build_image(self, url, arttype, image, likediv=5.0):
-        result = {'url': url, 'provider': self.name}
-        result['preview'] = url.replace('.fanart.tv/fanart/', '.fanart.tv/preview/')
-        result['rating'] = SortedDisplay(5.25 + int(image['likes']) / float(likediv), '{0} likes'.format(image['likes']))
-        result['size'] = _get_imagesize(arttype)
-        result['language'] = _get_imagelanguage(arttype, image)
+        result = {'url': url, 'provider': self.name,
+                  'preview': url.replace('.fanart.tv/fanart/', '.fanart.tv/preview/'),
+                  'rating': SortedDisplay(5.25 + int(image['likes']) / float(likediv),
+                                          '{0} likes'.format(image['likes'])), 'size': _get_imagesize(arttype),
+                  'language': _get_imagelanguage(arttype, image)}
         return result
 
     @abstractmethod
@@ -71,6 +73,7 @@ class FanartTVAbstractProvider(AbstractImageProvider):
     @abstractmethod
     def provides(self, types):
         pass
+
 
 class FanartTVSeriesProvider(FanartTVAbstractProvider):
     mediatype = mediatypes.TVSHOW
@@ -93,7 +96,7 @@ class FanartTVSeriesProvider(FanartTVAbstractProvider):
         'showbackground-season': mediatypes.SEASON + '.%s.fanart'
     }
 
-    def _get_images(self, data):
+    def _get_images(self, data, **kwargs):
         result = {}
         for arttype, artlist in data.iteritems():
             if arttype not in self.artmap:
@@ -108,7 +111,7 @@ class FanartTVSeriesProvider(FanartTVAbstractProvider):
                     generaltype = 'keyart'
                 if generaltype not in result:
                     result[generaltype] = []
-                url = urllib.quote(image['url'], safe="%/:=&?~#+!$,;'@()*[]")
+                url = urllib.parse.quote(image['url'], safe="%/:=&?~#+!$,;'@()*[]")
                 resultimage = self.build_image(url, arttype, image, 3.0)
                 if arttype == 'showbackground' and seasonnum is not None:
                     resultimage['hasseason'] = True
@@ -135,8 +138,9 @@ class FanartTVSeriesProvider(FanartTVAbstractProvider):
             return allitem
 
     def provides(self, types):
-        types = set(x if not x.startswith('season.') else re.sub(r'[\d]', '%s', x) for x in types)
-        return any(x in types for x in self.artmap.itervalues())
+        types = set(x if not x.startswith('season.') else re.sub(r'\d', '%s', x) for x in types)
+        return any(x in types for x in self.artmap.values())
+
 
 class FanartTVMovieProvider(FanartTVAbstractProvider):
     mediatype = mediatypes.MOVIE
@@ -157,7 +161,7 @@ class FanartTVMovieProvider(FanartTVAbstractProvider):
 
     disctitles = {'dvd': 'DVD', '3d': '3D', 'bluray': 'Blu-ray'}
 
-    def _get_images(self, data):
+    def _get_images(self, data, **kwargs):
         result = {}
         for arttype, artlist in data.iteritems():
             if arttype not in self.artmap:
@@ -168,7 +172,7 @@ class FanartTVMovieProvider(FanartTVAbstractProvider):
                     generaltype = 'keyart'
                 if artlist and generaltype not in result:
                     result[generaltype] = []
-                url = urllib.quote(image['url'], safe="%/:=&?~#+!$,;'@()*[]")
+                url = urllib.parse.quote(image['url'], safe="%/:=&?~#+!$,;'@()*[]")
                 resultimage = self.build_image(url, arttype, image)
                 if arttype == 'moviedisc':
                     display = self.disctitles.get(image['disc_type']) or image['disc_type']
@@ -179,8 +183,10 @@ class FanartTVMovieProvider(FanartTVAbstractProvider):
     def provides(self, types):
         return any(x in types for x in self.artmap.values())
 
+
 class FanartTVMovieSetProvider(FanartTVMovieProvider):
     mediatype = mediatypes.MOVIESET
+
 
 class FanartTVMusicVideoProvider(FanartTVAbstractProvider):
     mediatype = mediatypes.MUSICVIDEO
@@ -197,15 +203,15 @@ class FanartTVMusicVideoProvider(FanartTVAbstractProvider):
     }
 
     def _get_images(self, data, albumid):
-        def poofit(arttype, artlist, resultmap):
-            generaltype = self.artmap.get(arttype)
+        def poofit(_arttype, _artlist, resultmap):
+            generaltype = self.artmap.get(_arttype)
             if not generaltype:
                 return
-            if artlist and generaltype not in resultmap:
+            if _artlist and generaltype not in resultmap:
                 resultmap[generaltype] = []
-            for image in artlist:
-                url = urllib.quote(image['url'], safe="%/:=&?~#+!$,;'@()*[]")
-                resultmap[generaltype].append(self.build_image(url, arttype, image))
+            for image in _artlist:
+                url = urllib.parse.quote(image['url'], safe="%/:=&?~#+!$,;'@()*[]")
+                resultmap[generaltype].append(self.build_image(url, _arttype, image))
 
         result = {}
         for arttype, artlist in data.iteritems():
@@ -221,6 +227,7 @@ class FanartTVMusicVideoProvider(FanartTVAbstractProvider):
     def provides(self, types):
         return any(x in types for x in self.artmap.values())
 
+
 class FanartTVAlbumProvider(FanartTVMovieProvider):
     mediatype = mediatypes.ALBUM
     api_section = 'music/albums'
@@ -228,6 +235,7 @@ class FanartTVAlbumProvider(FanartTVMovieProvider):
         'albumcover': 'thumb',
         'cdart': 'discart'
     }
+
 
 class FanartTVArtistProvider(FanartTVMovieProvider):
     mediatype = mediatypes.ARTIST
@@ -240,9 +248,10 @@ class FanartTVArtistProvider(FanartTVMovieProvider):
         'musicbanner': 'banner'
     }
 
+
 def get_mediaid(uniqueids, mediatype):
     if mediatype == mediatypes.MUSICVIDEO:
-        return (uniqueids.get('mbartist'), uniqueids.get('mbgroup'))
+        return uniqueids.get('mbartist'), uniqueids.get('mbgroup')
     if mediatype == mediatypes.ALBUM:
         return uniqueids.get('mbgroup')
     if mediatype == mediatypes.ARTIST:
@@ -252,6 +261,7 @@ def get_mediaid(uniqueids, mediatype):
     for source in sources:
         if source in uniqueids:
             return uniqueids[source]
+
 
 def _get_imagesize(arttype):
     if arttype in ('hdtvlogo', 'hdclearart', 'hdmovielogo', 'hdmovieclearart', 'hdmusiclogo'):
@@ -273,6 +283,7 @@ def _get_imagesize(arttype):
     elif arttype in ('moviedisc', 'cdart', 'artistthumb', 'albumcover'):
         return SortedDisplay(1000, '1000x1000')
     return SortedDisplay(0, '')
+
 
 def _get_imagelanguage(arttype, image):
     if 'lang' not in image or arttype in ('showbackground', 'characterart', 'moviebackground', 'artistbackground'):

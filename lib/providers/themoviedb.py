@@ -1,5 +1,5 @@
 import xbmc
-from abc import ABCMeta
+from abc import ABCMeta, ABC
 
 from lib.libs import mediatypes
 from lib.libs.addonsettings import settings
@@ -9,7 +9,8 @@ from lib.providers.base import AbstractProvider, AbstractImageProvider, cache, b
 
 cfgurl = 'https://api.themoviedb.org/3/configuration'
 
-class TheMovieDBAbstractProvider(AbstractImageProvider):
+
+class TheMovieDBAbstractProvider(AbstractImageProvider, ABC):
     __metaclass__ = ABCMeta
     contenttype = 'application/json'
 
@@ -29,7 +30,8 @@ class TheMovieDBAbstractProvider(AbstractImageProvider):
             self._baseurl = response.json()['images']['secure_base_url']
         return self._baseurl
 
-    def _get_rating(self, image):
+    @staticmethod
+    def _get_rating(image):
         if image['vote_count']:
             # Reweigh ratings, increase difference from 5
             rating = image['vote_average']
@@ -60,10 +62,10 @@ class TheMovieDBAbstractProvider(AbstractImageProvider):
                 continue
             previewbit = 'w300' if arttype in ('backdrops', 'stills') else 'w342'
             for image in artlist:
-                resultimage = {'url': self.baseurl + 'original' + image['file_path'], 'provider': self.name}
-                resultimage['preview'] = self.baseurl + previewbit + image['file_path']
-                resultimage['language'] = image['iso_639_1'] if image['iso_639_1'] != 'xx' else None
-                resultimage['rating'] = self._get_rating(image)
+                resultimage = {'url': self.baseurl + 'original' + image['file_path'], 'provider': self.name,
+                               'preview': self.baseurl + previewbit + image['file_path'],
+                               'language': image['iso_639_1'] if image['iso_639_1'] != 'xx' else None,
+                               'rating': self._get_rating(image)}
                 sortsize = image['width' if arttype != 'posters' else 'height']
                 resultimage['size'] = SortedDisplay(sortsize, '{0}x{1}'.format(image['width'], image['height']))
                 generaltype = self.artmap[arttype]
@@ -76,6 +78,7 @@ class TheMovieDBAbstractProvider(AbstractImageProvider):
 
     def provides(self, types):
         return any(x in types for x in self.artmap.values())
+
 
 class TheMovieDBMovieProvider(TheMovieDBAbstractProvider):
     mediatype = mediatypes.MOVIE
@@ -98,6 +101,7 @@ class TheMovieDBMovieProvider(TheMovieDBAbstractProvider):
             return {}
 
         return self.process_data(data)
+
 
 class TheMovieDBEpisodeProvider(TheMovieDBAbstractProvider):
     mediatype = mediatypes.EPISODE
@@ -137,6 +141,7 @@ class TheMovieDBEpisodeProvider(TheMovieDBAbstractProvider):
 
         return self.process_data(data)
 
+
 class TheMovieDBMovieSetProvider(TheMovieDBAbstractProvider):
     mediatype = mediatypes.MOVIESET
 
@@ -158,6 +163,7 @@ class TheMovieDBMovieSetProvider(TheMovieDBAbstractProvider):
             return {}
 
         return self.process_data(data)
+
 
 class TheMovieDBSearch(AbstractProvider):
     name = SortedDisplay('themoviedb.org:search', 'The Movie Database search')
@@ -203,6 +209,7 @@ class TheMovieDBSearch(AbstractProvider):
         url = self.tvexternalidsurl.format(mediaid)
         data = self.get_data(url)
         return {} if not data or not data.get('tvdb_id') else {'tvdb': data['tvdb_id']}
+
 
 def get_mediaid(uniqueids, sources=('imdb', 'tmdb', 'unknown')):
     for source in sources:

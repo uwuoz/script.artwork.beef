@@ -13,6 +13,7 @@ ARTIST_INFOFOLDER_PROVIDER = SortedDisplay('file:art', 20223)
 
 ARTTYPE_MAXLENGTH = 30
 
+
 class ArtFilesAbstractProvider(object):
     __metaclass__ = ABCMeta
     # 13514 = Local art
@@ -20,11 +21,8 @@ class ArtFilesAbstractProvider(object):
 
     def buildimage(self, url, title, fromartistfolder=False):
         provider = ARTIST_INFOFOLDER_PROVIDER if fromartistfolder else self.name
-        result = {'url': url, 'provider': provider, 'preview': url}
-        result['title'] = title
-        result['rating'] = SortedDisplay(0, '')
-        result['size'] = SortedDisplay(0, '')
-        result['language'] = 'xx'
+        result = {'url': url, 'provider': provider, 'preview': url, 'title': title, 'rating': SortedDisplay(0, ''),
+                  'size': SortedDisplay(0, ''), 'language': 'xx'}
         return result
 
     def getextra(self, path, exacttypes, thumbs=False):
@@ -46,6 +44,7 @@ class ArtFilesAbstractProvider(object):
             if not popped:
                 nextno += 1
         return result
+
 
 class ArtFilesSeriesProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.TVSHOW
@@ -93,9 +92,10 @@ class ArtFilesSeriesProvider(ArtFilesAbstractProvider):
             result[arttype] = self.buildimage(path + filename, filename)
 
         if dirs and 'extrafanart' in dirs:
-                result.update(self.getextra(path, result.keys()))
+            result.update(self.getextra(path, result.keys()))
 
         return result
+
 
 class ArtFilesMovieProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.MOVIE
@@ -144,6 +144,7 @@ class ArtFilesMovieProvider(ArtFilesAbstractProvider):
 
         return result
 
+
 class ArtFilesMovieSetProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.MOVIESET
 
@@ -158,7 +159,7 @@ class ArtFilesMovieSetProvider(ArtFilesAbstractProvider):
         result = {}
         if inputfilename:
             dirname = next((name for name in dirs if name in iter_possible_cleannames(check_inputbase)), None)
-            if dirname: # '[centraldir]/[set name]/[arttype].[ext]'
+            if dirname:  # '[centraldir]/[set name]/[arttype].[ext]'
                 dirname = path + dirname + sep
                 _, dfiles = xbmcvfs.listdir(dirname)
                 for filename in dfiles:
@@ -179,13 +180,13 @@ class ArtFilesMovieSetProvider(ArtFilesAbstractProvider):
                 if not filename.endswith(ARTWORK_EXTS):
                     continue
                 basefile = os.path.splitext(filename)[0]
-                if check_inputbase: # '[centraldir]/[set name]-[arttype].[ext]'
+                if check_inputbase:  # '[centraldir]/[set name]-[arttype].[ext]'
                     if '-' not in basefile:
                         continue
                     firstbit, arttype = basefile.rsplit('-', 1)
                     if not arttype.isalnum() or firstbit not in iter_possible_cleannames(check_inputbase):
                         continue
-                else: # parent of movie directory
+                else:  # parent of movie directory
                     if not basefile.isalnum() or len(basefile) > ARTTYPE_MAXLENGTH:
                         continue
                     arttype = basefile
@@ -197,6 +198,7 @@ class ArtFilesMovieSetProvider(ArtFilesAbstractProvider):
 
                 result[arttype] = self.buildimage(path + filename, filename)
         return result
+
 
 class ArtFilesEpisodeProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.EPISODE
@@ -220,6 +222,7 @@ class ArtFilesEpisodeProvider(ArtFilesAbstractProvider):
 
             result[arttype] = self.buildimage(path + filename, filename)
         return result
+
 
 class ArtFilesMusicVideoProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.MUSICVIDEO
@@ -267,6 +270,7 @@ class ArtFilesMusicVideoProvider(ArtFilesAbstractProvider):
 
         return result
 
+
 class ArtFilesArtistProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.ARTIST
 
@@ -291,6 +295,7 @@ class ArtFilesArtistProvider(ArtFilesAbstractProvider):
                     continue
             result[arttype] = self.buildimage(path + filename, filename, True)
         return result
+
 
 class ArtFilesAlbumProvider(ArtFilesArtistProvider):
     mediatype = mediatypes.ALBUM
@@ -344,10 +349,12 @@ class ArtFilesAlbumProvider(ArtFilesArtistProvider):
 
         return result
 
+
 class ArtFilesSongProvider(ArtFilesAbstractProvider):
     mediatype = mediatypes.SONG
 
     def get_exact_images(self, mediaitem):
+        check_inputbase = ''
         paths = (mediaitem.file, find_central_infodir(mediaitem))
         if not paths[0] and not paths[1]:
             return {}
@@ -379,12 +386,13 @@ class ArtFilesSongProvider(ArtFilesAbstractProvider):
                 result[arttype] = self.buildimage(path + filename, filename, centraldir)
         return result
 
+
 def getopentypes(existingtypes, arttype):
     keys = [exact for exact in sorted(existingtypes, key=natural_sort)
         if arttype_matches_base(arttype, exact)]
     missing = []
     nextstart = 0
-    for count in xrange(100):
+    for count in range(100):
         if not keys:
             nextstart = count
             break

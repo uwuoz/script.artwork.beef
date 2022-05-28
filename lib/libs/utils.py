@@ -7,24 +7,31 @@ from lib.libs.pykodi import log
 
 SortedDisplay = namedtuple('SortedDisplay', ['sort', 'display'])
 
-def natural_sort(string, split_regex=re.compile(r'([0-9]+)')):
+
+def natural_sort(string, split_regex=re.compile(r'(\d+)')):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(split_regex, string)]
+
 
 def get_pathsep(path):
     # The path separator can go either way on Windows, C:\Videos or smb://SERVER/Videos
     return '\\' if '\\' in path else '/'
 
+
 def parent_dir(path):
     return basename(dirname(path))
+
 
 def get_simpledict_updates(original, newdict):
     return dict(pair for pair in newdict.iteritems() if pair[1] != original.get(pair[0]))
 
+
 # TODO: Load from advancedsettings.xml
-moviestacking = [re.compile(r'(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*[0-9]+)(.*?)(\.[^.]+)$', re.IGNORECASE),
+moviestacking = [re.compile(r'(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*\d+)(.*?)(\.[^.]+)$', re.IGNORECASE),
     re.compile(r'(.*?)([ _.-]*(?:cd|dvd|p(?:ar)?t|dis[ck])[ _.-]*[a-d])(.*?)(\.[^.]+)$', re.IGNORECASE),
     re.compile(r'(.*?)([ ._-]*[a-d])(.*?)(\.[^.]+)$', re.IGNORECASE)
 ]
+
+
 def get_movie_path_list(stackedpath):
     """Returns a list of filenames that can be used to find a movie's supporting files.
     The list includes the common base of all provided parts for stacked movies,
@@ -59,8 +66,8 @@ def get_movie_path_list(stackedpath):
                             pathbase + match.group(4),
                             firstpath]
                     break
-        else: # folder stacking
-            pass # I can't even get Kodi to add stacked VIDEO_TS rips period
+        else:  # folder stacking
+            pass  # I can't even get Kodi to add stacked VIDEO_TS rips period
         if not result:
             log("Couldn't get an unstacked path from \"{0}\"".format(stackedpath), xbmc.LOGWARNING)
             result = [firstpath]
@@ -68,12 +75,16 @@ def get_movie_path_list(stackedpath):
         result.append(dirname(dirname(result[0])) + get_pathsep(result[0]) + basename(result[0]))
     return result
 
+
 def path_component(string):
     return string.replace('/', '|').replace('\\', '|')
+
 
 replace_chars = ':?"/\\<>*|'
 replace_with = ('', '_', '+', '-')
 replace_colon_with = (' -',)
+
+
 def iter_possible_cleannames(originalname, uniqueslug=None):
     if uniqueslug:
         firstname = originalname + '_' + uniqueslug
@@ -104,6 +115,7 @@ def iter_possible_cleannames(originalname, uniqueslug=None):
                     cleaned = filename.replace(char, newchar)
                     yield cleaned
                     filenames.append(cleaned)
+
 
 def build_cleanest_name(originalname, uniqueslug=None):
     result = originalname

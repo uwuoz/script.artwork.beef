@@ -20,9 +20,11 @@ PREFERRED_SOURCE_MEDIA = {'tvshows': ('thetvdb.com', (TVSHOW, SEASON, EPISODE)),
 
 addon = pykodi.get_main_addon()
 
+
 def get_artinfo(mediatype, arttype):
     mediatype, arttype = hack_mediaarttype(mediatype, arttype)
     return artinfo[mediatype].get(arttype, default_artinfo)
+
 
 def hack_mediaarttype(mediatype, arttype):
     # Seasons were implemented oddly and need special help
@@ -30,6 +32,7 @@ def hack_mediaarttype(mediatype, arttype):
         return SEASON, arttype.rsplit('.', 1)[1]
     else:
         return mediatype, arttype
+
 
 default_artinfo = {'autolimit': 0, 'multiselect': False, 'download': False}
 artinfo = {
@@ -222,7 +225,7 @@ artinfo = {
     },
     MUSICVIDEO: {
         # album
-        'poster': { # poster is what Kodi scrapers set and matches other areas of the video library,
+        'poster': {  # poster is what Kodi scrapers set and matches other areas of the video library,
                 # but it should really be 'cover'
             'autolimit': 1,
             'multiselect': False,
@@ -233,7 +236,7 @@ artinfo = {
             'multiselect': False,
             'download': False
         },
-        'fanart': { # artist or maybe album
+        'fanart': {  # artist or maybe album
             'autolimit': 3,
             'multiselect': True,
             'limit_setting': True,
@@ -300,7 +303,7 @@ artinfo = {
         }
     },
     ALBUM: {
-        'thumb': { # I'd much prefer 'cover', but for now it's thumb just like music video 'poster'
+        'thumb': {  # I'd much prefer 'cover', but for now it's thumb just like music video 'poster'
             'autolimit': 1,
             'multiselect': False,
             'download': False
@@ -324,7 +327,7 @@ artinfo = {
         }
     },
     SONG: {
-        'thumb': { # single cover
+        'thumb': {  # single cover
             'autolimit': 1,
             'multiselect': False,
             'download': False
@@ -341,9 +344,11 @@ download_arttypes = dict((mediatype, []) for mediatype in artinfo)
 arttype_settingskeys = [m[0] + '.' + art[0] + ('_limit' if art[1].get('limit_setting') else '')
     for m in artinfo.items() for art in m[1].items()]
 
+
 def disabled(mediatype):
     return not any(iter_every_arttype(mediatype)) and not generatethumb(mediatype) and \
         not downloadanyartwork(mediatype)
+
 
 def iter_every_arttype(mediatype):
     for arttype, info in artinfo[mediatype].items():
@@ -357,6 +362,7 @@ def iter_every_arttype(mediatype):
     for arttype in othertypes[mediatype]:
         yield arttype
 
+
 def downloadartwork(mediatype, arttype):
     mediatype, arttype = hack_mediaarttype(mediatype, arttype)
     arttype, _ = _split_arttype(arttype)
@@ -364,6 +370,7 @@ def downloadartwork(mediatype, arttype):
         return True
     info = get_artinfo(mediatype, arttype)
     return info['download']
+
 
 def downloadanyartwork(mediatype):
     if download_arttypes.get(mediatype):
@@ -373,22 +380,28 @@ def downloadanyartwork(mediatype):
         return False
     return any(x for x in info.values() if x['download'])
 
+
 def _split_arttype(arttype):
     basetype = arttype.rstrip('0123456789')
     idx = 0 if basetype == arttype else int(arttype.replace(basetype, ''))
     return basetype, idx
 
+
 def generatethumb(mediatype):
     return togenerate.get(mediatype, False)
+
 
 def haspreferred_source(mediatype):
     return bool(preferred.get(mediatype))
 
+
 def ispreferred_source(mediatype, provider):
     return provider == preferred.get(mediatype, '')
 
+
 def only_filesystem(mediatype):
     return onlyfs.get(mediatype, False)
+
 
 def update_settings():
     always_multiple_selection = addon.get_setting('always_multiple_selection')
@@ -463,11 +476,11 @@ def update_settings():
                 addon.set_setting('preferredsource_' + media, '0')
             onlyfs[mediatype] = addon.get_setting('onlyfs_' + media)
 
-            if downloadconfig == '0': # None
+            if downloadconfig == '0':  # None
                 download_arttypes[mediatype] = []
                 for atype in artinfo[mediatype].values():
                     atype['download'] = False
-            elif downloadconfig == '1': # all configured from web and local
+            elif downloadconfig == '1':  # all configured from web and local
                 download_arttypes[mediatype] = list(othertypes[mediatype])
                 for atype in artinfo[mediatype].values():
                     atype['download'] = atype['autolimit'] > 0
@@ -476,6 +489,7 @@ def update_settings():
                 if arttype.startswith('animated'):
                     artconfig['download'] = True
 
+
 def _get_autolimit_from_setting(settingid):
     result = addon.get_setting(settingid)
     if settingid.endswith('_limit'):
@@ -483,9 +497,11 @@ def _get_autolimit_from_setting(settingid):
         return result, result > 1
     return (1 if result else 0), False
 
+
 def _set_allmulti(always_multi):
     for typeinfo in artinfo.values():
         for arttypeinfo in typeinfo.values():
             arttypeinfo['multiselect'] = always_multi
+
 
 update_settings()

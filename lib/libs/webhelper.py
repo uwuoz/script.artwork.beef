@@ -4,6 +4,7 @@ from requests.exceptions import ConnectionError, Timeout, RequestException
 # import from `requests` because Jarvis / some platforms still have old urllib3
 from requests.packages.urllib3.util.retry import Retry
 
+
 def retryable_session(retries=3, backoff_factor=0.5, status_forcelist=(500, 502, 504, 520), session=None):
     # from https://www.peterbe.com/plog/best-practice-with-retries-with-requests
     session = session or requests.Session()
@@ -14,6 +15,7 @@ def retryable_session(retries=3, backoff_factor=0.5, status_forcelist=(500, 502,
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
+
 
 class Getter(object):
     def __init__(self, contenttype=None, login=lambda: False, session=None):
@@ -45,6 +47,7 @@ class Getter(object):
             return
         result.raise_for_status()
         return result
+
 
 class GetterError(Exception):
     def __init__(self, message, cause, connection_error):

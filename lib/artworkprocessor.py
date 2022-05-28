@@ -10,7 +10,8 @@ from lib.artworkselection import prompt_for_artwork
 from lib.filemanager import FileManager, FileError
 from lib.gatherer import Gatherer
 from lib.libs import mediainfo as info, mediatypes, pykodi, quickjson
-from lib.libs.addonsettings import settings, PROGRESS_DISPLAY_FULLPROGRESS, PROGRESS_DISPLAY_NONE, EXCLUSION_PATH_TYPE_FOLDER, EXCLUSION_PATH_TYPE_PREFIX, EXCLUSION_PATH_TYPE_REGEX
+from lib.libs.addonsettings import settings, PROGRESS_DISPLAY_FULLPROGRESS, PROGRESS_DISPLAY_NONE, \
+    EXCLUSION_PATH_TYPE_FOLDER, EXCLUSION_PATH_TYPE_PREFIX, EXCLUSION_PATH_TYPE_REGEX
 from lib.libs.processeditems import ProcessedItems
 from lib.libs.pykodi import datetime_now, get_kodi_version, localize as L, log
 from lib.libs.quickjson import JSONException
@@ -36,6 +37,7 @@ ENTER_COLLECTION_NAME = 32057
 ENTER_ARTIST_TRACK_NAMES = 32058
 NO_IDS_MESSAGE = 32030
 FILENAME_ENCODING_ERROR = 32040
+
 
 class ArtworkProcessor(object):
     def __init__(self, monitor=None):
@@ -82,11 +84,12 @@ class ArtworkProcessor(object):
             self.progress.close()
             self.visible = False
 
-    def notify_warning(self, message, header=None, error=False):
+    @staticmethod
+    def notify_warning(message, header=None, error=False):
         if settings.progressdisplay != PROGRESS_DISPLAY_NONE:
             header = "Artwork Beef: " + header if header else "Artwork Beef"
             xbmcgui.Dialog().notification(header, message,
-                xbmcgui.NOTIFICATION_ERROR if error else xbmcgui.NOTIFICATION_WARNING)
+                                          xbmcgui.NOTIFICATION_ERROR if error else xbmcgui.NOTIFICATION_WARNING)
 
     def init_run(self, show_progress=False, chunkcount=1):
         self.setlanguages()
@@ -115,7 +118,9 @@ class ArtworkProcessor(object):
     @property
     def processor_busy(self):
         # DEPRECATED: StringCompare is deprecated in Krypton, gone in Leia
-        return pykodi.get_conditional('![StringCompare(Window(Home).Property(ArtworkBeef.Status),idle) | String.IsEqual(Window(Home).Property(ArtworkBeef.Status),idle)]')
+        return pykodi.get_conditional(
+            '![StringCompare(Window(Home).Property(ArtworkBeef.Status),idle) | String.IsEqual(Window(Home).Property('
+            'ArtworkBeef.Status),idle)]')
 
     def process_item(self, mediatype, dbid, mode):
         if self.processor_busy:
@@ -129,7 +134,7 @@ class ArtworkProcessor(object):
         if mediatype in mediatypes.artinfo and (mediatype not in mediatypes.audiotypes or get_kodi_version() >= 18):
             mediaitem = info.MediaItem(quickjson.get_item_details(dbid, mediatype))
             log("Processing {0} '{1}' {2}.".format(mediatype, mediaitem.label, 'automatically'
-                if mode == MODE_AUTO else 'manually'))
+            if mode == MODE_AUTO else 'manually'))
         else:
             if mode == MODE_GUI:
                 busy.close()
@@ -158,16 +163,17 @@ class ArtworkProcessor(object):
                 elif gen_epthumb or download_ep:
                     for episode in quickjson.get_episodes(dbid):
                         if gen_epthumb and not info.has_generated_thumbnail(episode) \
-                        or download_ep and info.has_art_todownload(episode['art'], mediatypes.EPISODE):
+                                or download_ep and info.has_art_todownload(episode['art'], mediatypes.EPISODE):
                             episode = info.MediaItem(episode)
                             episode.skip_artwork = ['fanart']
                             medialist.append(episode)
             elif mediatype == mediatypes.ARTIST and not mediatypes.disabled(mediatypes.ALBUM):
-                medialist.extend(info.MediaItem(album) for album in quickjson.get_albums(mediaitem.label, mediaitem.dbid))
+                medialist.extend(
+                    info.MediaItem(album) for album in quickjson.get_albums(mediaitem.label, mediaitem.dbid))
             if mediatype in (mediatypes.ALBUM, mediatypes.ARTIST) and not mediatypes.disabled(mediatypes.ALBUM) \
-            and not mediatypes.disabled(mediatypes.SONG):
+                    and not mediatypes.disabled(mediatypes.SONG):
                 medialist.extend(info.MediaItem(song)
-                    for song in quickjson.get_songs(mediaitem.mediatype, mediaitem.dbid))
+                                 for song in quickjson.get_songs(mediaitem.mediatype, mediaitem.dbid))
             self.process_medialist(medialist, True)
 
     def _manual_item_process(self, mediaitem, busy):
@@ -195,7 +201,7 @@ class ArtworkProcessor(object):
                         availableart['keyart'].append(art)
             tag_forcedandexisting_art(availableart, mediaitem.forcedart, mediaitem.art)
             selectedarttype, selectedart = prompt_for_artwork(mediaitem.mediatype, mediaitem.label,
-                availableart, self.monitor)
+                                                              availableart, self.monitor)
             if selectedarttype and selectedarttype not in availableart:
                 self.manual_id(mediaitem)
                 return
@@ -228,7 +234,7 @@ class ArtworkProcessor(object):
                     notifycount(len(toset))
         else:
             xbmcgui.Dialog().notification(L(NOT_AVAILABLE_MESSAGE),
-                L(SOMETHING_MISSING) + ' ' + L(FINAL_MESSAGE), '-', 8000)
+                                          L(SOMETHING_MISSING) + ' ' + L(FINAL_MESSAGE), '-', 8000)
         self.finish_run()
 
     def process_medialist(self, medialist, alwaysnotify=False):
@@ -326,7 +332,7 @@ class ArtworkProcessor(object):
 
             # Then add the rest of the missing art
             selectedart.update(self.get_top_missing_art(info.iter_missing_arttypes(mediaitem, existingart),
-                mediatype, existingart, mediaitem.availableart))
+                                                        mediatype, existingart, mediaitem.availableart))
 
             selectedart = get_simpledict_updates(mediaitem.art, selectedart)
             mediaitem.selectedart = selectedart
@@ -353,7 +359,7 @@ class ArtworkProcessor(object):
             if not (mediatype == mediatypes.EPISODE and 'fanart' in mediaitem.skip_artwork) and \
                     mediatype != mediatypes.SONG:
                 self.processed.set_nextdate(mediaitem.dbid, mediatype, mediaitem.label,
-                    datetime_now() + timedelta(days=self.get_nextcheckdelay(mediaitem)))
+                                            datetime_now() + timedelta(days=self.get_nextcheckdelay(mediaitem)))
             if mediatype == mediatypes.TVSHOW:
                 self.processed.set_data(mediaitem.dbid, mediatype, mediaitem.label, mediaitem.season)
         if mediaitem.borked_filename:
@@ -376,8 +382,8 @@ class ArtworkProcessor(object):
     def get_nextcheckdelay(self, mediaitem):
         weeks = 4 if mediatypes.only_filesystem(mediaitem.mediatype) \
             else 32 if mediaitem.missingid or not mediaitem.missingart \
-                or mediaitem.mediatype in (mediatypes.MOVIE, mediatypes.TVSHOW) \
-                    and mediaitem.premiered < self.freshstart \
+                       or mediaitem.mediatype in (mediatypes.MOVIE, mediatypes.TVSHOW) \
+                       and mediaitem.premiered < self.freshstart \
             else 16
         return plus_some(weeks * 7, weeks)
 
@@ -385,11 +391,11 @@ class ArtworkProcessor(object):
         label = ENTER_COLLECTION_NAME if mediaitem.mediatype == mediatypes.MOVIESET else ENTER_ARTIST_TRACK_NAMES
         result = xbmcgui.Dialog().input(L(label), mediaitem.label)
         if not result:
-            return False # Cancelled
+            return False  # Cancelled
         options = search[mediaitem.mediatype].search(result, mediaitem.mediatype)
         selected = xbmcgui.Dialog().select(mediaitem.label, [option['label'] for option in options])
         if selected < 0:
-            return False # Cancelled
+            return False  # Cancelled
         uq = options[selected]['uniqueids']
         toset = uq.get('tmdb')
         if not toset and 'mbtrack' in uq and 'mbgroup' in uq and 'mbartist' in uq:
@@ -430,7 +436,7 @@ class ArtworkProcessor(object):
                         existingartnames.append(art)
 
                 newart = [art for art in availableart[missingart] if
-                    self._auto_filter(missingart, art, mediatype, availableart[missingart], existingurls)]
+                          self._auto_filter(missingart, art, mediatype, availableart[missingart], existingurls)]
                 if not newart:
                     continue
                 newartcount = 0
@@ -445,7 +451,7 @@ class ArtworkProcessor(object):
                         newartcount += 1
             else:
                 newart = next((art for art in availableart[missingart] if
-                    self._auto_filter(missingart, art, mediatype, availableart[missingart])), None)
+                               self._auto_filter(missingart, art, mediatype, availableart[missingart])), None)
                 if newart:
                     newartwork[missingart] = newart['url']
         return newartwork
@@ -454,17 +460,19 @@ class ArtworkProcessor(object):
         if art['rating'].sort < settings.minimum_rating:
             return False
         if not skippreferred and mediatypes.haspreferred_source(mediatype) and \
-            not mediatypes.ispreferred_source(mediatype, art['provider'][0]) and \
-            any(1 for i in availableart if mediatypes.ispreferred_source(mediatype, i['provider'][0]) and
-                self._auto_filter(basearttype, i, mediatype, availableart, ignoreurls, True)):
+                not mediatypes.ispreferred_source(mediatype, art['provider'][0]) and \
+                any(1 for i in availableart if mediatypes.ispreferred_source(mediatype, i['provider'][0]) and
+                                               self._auto_filter(basearttype, i, mediatype, availableart, ignoreurls,
+                                                                 True)):
             return False
         if basearttype.endswith('fanart') and art['size'].sort < settings.minimum_size:
             return False
         if art['provider'].sort == 'theaudiodb.com' or not art['language'] and \
-            (basearttype.endswith('poster') and settings.titlefree_poster or
-                basearttype.endswith(('fanart', 'keyart', 'characterart'))):
+                (basearttype.endswith('poster') and settings.titlefree_poster or
+                 basearttype.endswith(('fanart', 'keyart', 'characterart'))):
             return skippreferred or art['url'] not in ignoreurls
         return art['language'] in self.autolanguages and (skippreferred or art['url'] not in ignoreurls)
+
 
 def add_art_to_library(mediatype, seasons, dbid, selectedart):
     if not selectedart:
@@ -477,27 +485,35 @@ def add_art_to_library(mediatype, seasons, dbid, selectedart):
     if mediatype == mediatypes.TVSHOW:
         for season, season_id in seasons.iteritems():
             info.update_art_in_library(mediatypes.SEASON, season_id, dict((arttype.split('.')[2], url)
-                for arttype, url in selectedart.iteritems() if arttype.startswith('season.{0}.'.format(season))))
+                                                                          for arttype, url in selectedart.iteritems() if
+                                                                          arttype.startswith(
+                                                                              'season.{0}.'.format(season))))
         info.update_art_in_library(mediatype, dbid, dict((arttype, url)
-            for arttype, url in selectedart.iteritems() if '.' not in arttype))
+                                                         for arttype, url in selectedart.iteritems() if
+                                                         '.' not in arttype))
     else:
         info.update_art_in_library(mediatype, dbid, selectedart)
     info.remove_local_from_texturecache(selectedart.values())
+
 
 def finalmessages(count):
     return (L(ARTWORK_UPDATED_MESSAGE).format(count), L(FINAL_MESSAGE)) if count else \
         (L(NO_ARTWORK_UPDATED_MESSAGE), L(SOMETHING_MISSING) + ' ' + L(FINAL_MESSAGE))
 
+
 def notifycount(count):
     header, message = finalmessages(count)
     xbmcgui.Dialog().notification("Artwork Beef: " + header, message, '-', 8000)
 
+
 def plus_some(start, rng):
     return start + (random.randrange(-rng, rng + 1))
+
 
 def populate_musiccentraldir():
     artistpath = quickjson.get_settingvalue('musiclibrary.artistsfolder')
     mediatypes.central_directories[mediatypes.ARTIST] = artistpath
+
 
 def is_excluded(mediaitem):
     if mediaitem.file is None:
@@ -519,13 +535,14 @@ def is_excluded(mediaitem):
 
 def tag_forcedandexisting_art(availableart, forcedart, existingart):
     typeinsert = {}
-    for exacttype, artlist in sorted(forcedart.iteritems(), key=lambda arttype: natural_sort(arttype[0])):
+    for exacttype, artlist in sorted(forcedart.iteritems(), key=lambda _arttype: natural_sort(_arttype[0])):
         arttype = info.get_basetype(exacttype)
         if arttype not in availableart:
             availableart[arttype] = artlist
         else:
             for image in artlist:
-                match = next((available for available in availableart[arttype] if available['url'] == image['url']), None)
+                match = next((available for available in availableart[arttype] if available['url'] == image['url']),
+                             None)
                 if match:
                     if 'title' in image and 'title' not in match:
                         match['title'] = image['title']
@@ -545,5 +562,5 @@ def tag_forcedandexisting_art(availableart, forcedart, existingart):
             else:
                 typeinsert[arttype] = typeinsert[arttype] + 1 if arttype in typeinsert else 0
                 image = {'url': existingurl, 'preview': existingurl, 'title': exacttype,
-                    'existing': True, 'provider': SortedDisplay('current', L(CURRENT_ART))}
+                         'existing': True, 'provider': SortedDisplay('current', L(CURRENT_ART))}
                 availableart[arttype].insert(typeinsert[arttype], image)

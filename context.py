@@ -6,6 +6,7 @@ from lib.artworkprocessor import ArtworkProcessor
 # DEPRECATED: StringCompare in addon.xml is deprecated in Krypton, gone in Leia,
 #  but both resolve to False when unrecognized so the result is the same for all versions
 
+
 def main(mode):
     listitem = sys.listitem
     mediatype = get_mediatype(listitem)
@@ -14,6 +15,7 @@ def main(mode):
     if dbid and mediatype:
         processor = ArtworkProcessor()
         processor.process_item(mediatype, dbid, mode)
+
 
 def get_mediatype(listitem):
     try:
@@ -31,8 +33,10 @@ def get_mediatype(listitem):
         xbmc.sleep(200)
         mediatype = xbmc.getInfoLabel('ListItem.DBTYPE')
     if not mediatype:
-        xbmc.executebuiltin('Notification(Artwork Beef cannot proceed, "Got an unexpected content type. Try again, it should work.", 6000, DefaultIconWarning.png)')
+        xbmc.executebuiltin('Notification(Artwork Beef cannot proceed, "Got an unexpected content type. Try again, '
+                            'it should work.", 6000, DefaultIconWarning.png)')
     return mediatype
+
 
 def get_dbid(listitem):
     try:
@@ -48,6 +52,7 @@ def get_dbid(listitem):
         return int(listitem.getfilename().split('?')[0].rstrip('/').split('/')[-1])
     else:
         return int(xbmc.getInfoLabel('ListItem.DBID'))
+
 
 if __name__ == '__main__':
     main('auto')

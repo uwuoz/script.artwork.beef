@@ -1,20 +1,23 @@
 import urllib
 import xbmcvfs
+import urllib.parse
 
 from lib.libs import pykodi, mediatypes, quickjson
 from lib.libs.mediainfo import iter_base_arttypes, fill_multiart, keep_arttype
 from lib.libs.addonsettings import settings
 
 # 0=original URLs, 1=new URL, 2=URL match
-old_urls_fix = {
-    'tvdb': (
-        ('http://www.thetvdb.com/banners/', 'http://thetvdb.com/banners/', 'https://thetvdb.com/banners/'),
-        'https://www.thetvdb.com/banners/',
-        'thetvdb.com/banners/'),
-    'tadb': (
-        ('http://media.theaudiodb.com/images/', 'http://www.theaudiodb.com/images/'),
-        'https://www.theaudiodb.com/images/',
-        'theaudiodb.com/images/')}
+old_urls_fix = dict(tvdb=(
+    ('http://www.thetvdb.com/banners/',
+     'http://thetvdb.com/banners/',
+     'https://thetvdb.com/banners/'),
+    'https://www.thetvdb.com/banners/',
+    'thetvdb.com/banners/'), tadb=(
+    ('http://media.theaudiodb.com/images/',
+     'http://www.theaudiodb.com/images/'),
+    'https://www.theaudiodb.com/images/',
+    'theaudiodb.com/images/'))
+
 
 def clean_artwork(mediaitem):
     updated_art = dict(_get_clean_art(*art) for art in mediaitem.art.iteritems())
@@ -44,23 +47,26 @@ def clean_artwork(mediaitem):
                 quickjson.remove_texture_byurl(url)
     return updated_art
 
+
 def remove_specific_arttype(mediaitem, arttype):
-    '''pass '* all' as arttype to clear all artwork, '* nowhitelist' to clear images not on whitelist.'''
+    """pass '* all' as arttype to clear all artwork, '* nowhitelist' to clear images not on whitelist."""
     if arttype == '* all':
         return dict((atype, None) for atype in mediaitem.art)
     elif arttype == '* nowhitelist':
         return dict((atype, None) for atype, url in mediaitem.art.iteritems()
-            if not keep_arttype(mediaitem.mediatype, atype, url))
+                    if not keep_arttype(mediaitem.mediatype, atype, url))
     finalart = {}
     if arttype in mediaitem.art:
         finalart[arttype] = None
     return finalart
 
+
 def _get_clean_art(arttype, url):
-    if not url: # Remove empty URLs
+    # Remove empty URLs
+    if not url:
         url = None
     elif url.startswith('http') and settings.clean_imageurls:
         # Ensure all HTTP urls are properly escaped
-        url = urllib.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
+        url = urllib.parse.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
 
     return arttype, url

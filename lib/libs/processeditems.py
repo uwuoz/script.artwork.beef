@@ -8,6 +8,7 @@ VERSION = 1
 # DEPRECATED short 2017-08-26: `medialabel IS NULL` x3 is only for transitioning from VERSION = 0
 #  maybe the first check in `_get_version` can go later on
 
+
 class ProcessedItems(object):
     def __init__(self):
         # data is uniqueid for sets, last known season for TV shows, musicbrainz track/album/artist IDs for music videos
@@ -15,7 +16,8 @@ class ProcessedItems(object):
 
     def is_stale(self, mediaid, mediatype, medialabel):
         result = self.db.fetchone("""SELECT * FROM processeditems WHERE mediaid=? AND mediatype=?
-            AND (medialabel=? or medialabel IS NULL) AND nextdate > datetime('now')""", (mediaid, mediatype, medialabel))
+            AND (medialabel=? or medialabel IS NULL) AND nextdate > datetime('now')""",
+                                  (mediaid, mediatype, medialabel))
         return True if not result else False
 
     def set_nextdate(self, mediaid, mediatype, medialabel, nextdate):
@@ -48,6 +50,7 @@ class ProcessedItems(object):
         return bool(self.db.fetchone("SELECT * FROM processeditems WHERE mediaid=? AND mediatype=?",
             (mediaid, mediatype)))
 
+
 def upgrade_processeditems(db, fromversion):
     if fromversion == VERSION:
         return VERSION
@@ -65,9 +68,11 @@ def upgrade_processeditems(db, fromversion):
 
     return workingversion
 
+
 SETTINGS_TABLE_VALUE = 'database-settings'
 # must be quoted to use as identifier
 SETTINGS_TABLE = '"{0}"'.format(SETTINGS_TABLE_VALUE)
+
 
 class Database(object):
     def __init__(self, databasename, upgrade_fn):
@@ -116,10 +121,10 @@ class Database(object):
     def _get_version(self):
         if not self.fetchone("SELECT name FROM sqlite_master WHERE type='table' AND name='processeditems'"):
             self._build_settings()
-            return -1 # for future databases, this check goes away ...
+            return -1  # for future databases, this check goes away ...
         if not self.fetchone("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (SETTINGS_TABLE_VALUE,)):
-            self._build_settings(0) # ... and this is empty
-            return 0 # and returns -1
+            self._build_settings(0)   # ... and this is empty
+            return 0  # and returns -1
 
         return int(self._get_setting_value('database version', 0))
 

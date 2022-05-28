@@ -13,6 +13,7 @@ from lib.libs.pykodi import localize as L, log, get_kodi_version
 from lib.providers import search
 from lib.seriesselection import SeriesSelector
 
+
 class M(object):
     ADD_MISSING_HEADER = 32401
     ADD_MISSING_MESSAGE = 32402
@@ -56,6 +57,7 @@ class M(object):
     ALBUMS = 36919
     SONGS = 36921
 
+
 def main():
     settings.update_settings()
     mediatypes.update_settings()
@@ -76,52 +78,55 @@ def main():
             options = [(L(M.STOP), 'NotifyAll(script.artwork.beef:control, CancelCurrent)')]
         else:
             options = [(L(M.ADD_MISSING_FOR), add_missing_for),
-                (L(M.NEW_LOCAL_FILES), 'NotifyAll(script.artwork.beef:control, ProcessLocalVideos)'),
-                (L(M.IDENTIFY_UNMATCHED_SETS), lambda: identify_unmatched(mediatypes.MOVIESET)),
-                (L(M.IDENTIFY_UNMATCHED_MVIDS), lambda: identify_unmatched(mediatypes.MUSICVIDEO)),
-                (L(M.REMOVE_SPECIFIC_TYPES), remove_specific_arttypes),
-                (L(M.MAKE_LOCAL), make_local),
-                (L(M.CACHE_VIDEO_ARTWORK), cache_artwork)]
+                       (L(M.NEW_LOCAL_FILES), 'NotifyAll(script.artwork.beef:control, ProcessLocalVideos)'),
+                       (L(M.IDENTIFY_UNMATCHED_SETS), lambda: identify_unmatched(mediatypes.MOVIESET)),
+                       (L(M.IDENTIFY_UNMATCHED_MVIDS), lambda: identify_unmatched(mediatypes.MUSICVIDEO)),
+                       (L(M.REMOVE_SPECIFIC_TYPES), remove_specific_arttypes),
+                       (L(M.MAKE_LOCAL), make_local),
+                       (L(M.CACHE_VIDEO_ARTWORK), cache_artwork)]
             if get_kodi_version() >= 18:
                 options.append((L(M.CACHE_MUSIC_ARTWORK), lambda: cache_artwork('music')))
                 options.append((L(M.SAVE_ARTTYPES_TO_ASXML), save_arttypes_to_asxml))
                 if advancedsettings.has_backup():
                     options.append((L(M.RESTORE_ASXML_BACKUP), advancedsettings.restore_backup))
         selected = xbmcgui.Dialog().select('Artwork Beef', [option[0] for option in options])
-        if selected >= 0 and selected < len(options):
+        if 0 <= selected < len(options):
             action = options[selected][1]
-            if isinstance(action, basestring):
+            if isinstance(action, str):
                 pykodi.execute_builtin(action)
             else:
                 action()
+
 
 def notify_count(message, count):
     countmessage = message.format(count)
     log(countmessage, xbmc.LOGINFO)
     xbmcgui.Dialog().notification('Artwork Beef', countmessage)
 
+
 def add_missing_for():
     options = [(L(M.FOR_NEW_VIDEOS), 'ProcessNewVideos'), (L(M.FOR_OLD_VIDEOS), 'ProcessNewAndOldVideos'),
-        (L(M.FOR_ALL_VIDEOS), 'ProcessAllVideos')]
+               (L(M.FOR_ALL_VIDEOS), 'ProcessAllVideos')]
     if get_kodi_version() >= 18:
         options.extend(((L(M.FOR_NEW_AUDIO), 'ProcessNewMusic'), (L(M.FOR_OLD_AUDIO), 'ProcessNewAndOldMusic'),
-            (L(M.FOR_ALL_AUDIO), 'ProcessAllMusic')))
+                        (L(M.FOR_ALL_AUDIO), 'ProcessAllMusic')))
 
     selected = xbmcgui.Dialog().select(L(M.ADD_MISSING_FOR), [option[0] for option in options])
-    if selected >= 0 and selected < len(options):
+    if 0 <= selected < len(options):
         pykodi.execute_builtin('NotifyAll(script.artwork.beef:control, {0})'.format(options[selected][1]))
+
 
 def remove_specific_arttypes():
     options = [(L(M.MOVIES), lambda: quickjson.get_item_list(mediatypes.MOVIE), mediatypes.MOVIE),
-        (L(M.SERIES), quickjson.get_tvshows, mediatypes.TVSHOW),
-        (L(M.SEASONS), quickjson.get_seasons, mediatypes.SEASON),
-        (L(M.MOVIESETS), lambda: quickjson.get_item_list(mediatypes.MOVIESET), mediatypes.MOVIESET),
-        (L(M.EPISODES), quickjson.get_episodes, mediatypes.EPISODE),
-        (L(M.MUSICVIDEOS), lambda: quickjson.get_item_list(mediatypes.MUSICVIDEO), mediatypes.MUSICVIDEO)]
+               (L(M.SERIES), quickjson.get_tvshows, mediatypes.TVSHOW),
+               (L(M.SEASONS), quickjson.get_seasons, mediatypes.SEASON),
+               (L(M.MOVIESETS), lambda: quickjson.get_item_list(mediatypes.MOVIESET), mediatypes.MOVIESET),
+               (L(M.EPISODES), quickjson.get_episodes, mediatypes.EPISODE),
+               (L(M.MUSICVIDEOS), lambda: quickjson.get_item_list(mediatypes.MUSICVIDEO), mediatypes.MUSICVIDEO)]
     if get_kodi_version() >= 18:
         options.extend(((L(M.ARTISTS), lambda: quickjson.get_item_list(mediatypes.ARTIST), mediatypes.ARTIST),
-            (L(M.ALBUMS), lambda: quickjson.get_item_list(mediatypes.ALBUM), mediatypes.ALBUM),
-            (L(M.SONGS), lambda: quickjson.get_item_list(mediatypes.SONG), mediatypes.SONG)))
+                        (L(M.ALBUMS), lambda: quickjson.get_item_list(mediatypes.ALBUM), mediatypes.ALBUM),
+                        (L(M.SONGS), lambda: quickjson.get_item_list(mediatypes.SONG), mediatypes.SONG)))
 
     selected = xbmcgui.Dialog().select(L(M.REMOVE_SPECIFIC_TYPES), [option[0] + " ..." for option in options])
     if selected < 0 or selected >= len(options):
@@ -132,7 +137,8 @@ def remove_specific_arttypes():
     counter = {}
     types_to_remove = set()
     for arttype, url in chain.from_iterable(d.get('art', {}).iteritems() for d in allitems):
-        if '.' in arttype: continue
+        if '.' in arttype:
+            continue
         counter['* all'] = counter.get('* all', 0) + 1
         counter[arttype] = counter.get(arttype, 0) + 1
         if not info.keep_arttype(options[selected][2], arttype, url):
@@ -143,22 +149,26 @@ def remove_specific_arttypes():
     busy.close()
     ftype = lambda intype: '* ' + ', '.join(sorted(types_to_remove)) if intype == '* nowhitelist' else intype
     selectedarttype = xbmcgui.Dialog().select(options[selected][0],
-        ["{0}: {1}".format(ftype(arttype), counter[arttype]) for arttype in arttypes])
-    if selectedarttype >= 0 and selectedarttype < len(arttypes):
+                                              ["{0}: {1}".format(ftype(arttype), counter[arttype]) for arttype in
+                                               arttypes])
+    if 0 <= selectedarttype < len(arttypes):
         def removetypes(mediaitem):
             changedart = cleaner.remove_specific_arttype(mediaitem, arttypes[selectedarttype])
-            info.remove_local_from_texturecache((mediaitem.art[arttype] for arttype in changedart), True)
+            info.remove_local_from_texturecache((mediaitem.art[arttype] for _arttype in changedart), True)
             return changedart
+
         fixcount = runon_medialist(removetypes, L(M.REMOVE_SPECIFIC_TYPES), allitems, options[selected][0])
         notify_count(L(M.REMOVED_ART_COUNT), fixcount)
 
+
 def make_local():
     fileman = FileManager()
+
     def downloadforitem(mediaitem):
         try:
             fileman.downloadfor(mediaitem)
             newart = dict((k, v) for k, v in mediaitem.downloadedart.iteritems()
-                if not v or not v.startswith('http'))
+                          if not v or not v.startswith('http'))
             for arttype in newart:
                 # remove old URL from texture cache
                 if mediaitem.art.get(arttype, '').startswith('http'):
@@ -169,19 +179,22 @@ def make_local():
             log(ex.message, xbmc.LOGERROR)
             xbmcgui.Dialog().notification("Artwork Beef", ex.message, xbmcgui.NOTIFICATION_ERROR)
             return {}
+
     downloaded = runon_medialist(downloadforitem, L(M.MAKE_LOCAL), fg=True)
     xbmcgui.Dialog().ok("Artwork Beef", L(M.DOWNLOAD_COUNT).format(downloaded)
-        + ' - {0:0.2f}MB'.format(fileman.size / 1000000.00))
+                        + ' - {0:0.2f}MB'.format(fileman.size / 1000000.00))
+
 
 def cache_artwork(librarytype='videos'):
     fileman = FileManager(False, True)
     if not fileman.imagecachebase:
         xbmcgui.Dialog().notification("Artwork Beef", L(M.REMOTE_CONTROL_REQUIRED),
-            xbmcgui.NOTIFICATION_WARNING)
+                                      xbmcgui.NOTIFICATION_WARNING)
         return
     heading = L(M.CACHE_VIDEO_ARTWORK if librarytype == 'videos' else M.CACHE_MUSIC_ARTWORK)
     cached = runon_medialist(lambda mi: fileman.cachefor(mi.art, True), heading, librarytype, fg=True)
     xbmcgui.Dialog().ok("Artwork Beef", L(M.CACHED_COUNT).format(cached))
+
 
 def identify_unmatched(mediatype):
     busy = pykodi.get_busydialog()
@@ -196,7 +209,7 @@ def identify_unmatched(mediatype):
     if unmatched:
         selected = xbmcgui.Dialog().select(L(M.UNMATCHED_ITEMS), [item['label'] for item in unmatched])
         if selected < 0:
-            return # Cancelled
+            return  # Cancelled
         mediaitem = info.MediaItem(unmatched[selected])
         info.add_additional_iteminfo(mediaitem, processed, search)
         processor = ArtworkProcessor()
@@ -205,12 +218,14 @@ def identify_unmatched(mediatype):
     else:
         xbmcgui.Dialog().notification("Artwork Beef", L(M.NO_UNMATCHED_ITEMS), xbmcgui.NOTIFICATION_INFO)
 
+
 def set_download_artwork(mediatype):
     if mediatype not in mediatypes.artinfo:
         return
     options = list((x for x, y in mediatypes.artinfo[mediatype].items() if y['autolimit']))
     options.extend(mediatypes.othertypes[mediatype])
     pykodi.get_main_addon().set_setting(mediatype + '.download_arttypes', ', '.join(options))
+
 
 def save_arttypes_to_asxml():
     can_continue = xbmcgui.Dialog().ok("Artwork Beef", L(M.INTRO_TEXT))
@@ -223,26 +238,31 @@ def save_arttypes_to_asxml():
             art_toset[mediatype] = list(mediatypes.iter_every_arttype(mediatype))
         else:
             art_toset[mediatype] = [a for a in mediatypes.iter_every_arttype(mediatype)
-                if not a[-1].isdigit()]
+                                    if not a[-1].isdigit()]
 
     advancedsettings.save_arttypes(art_toset)
 
+
 def show_artwork_log():
     if pykodi.get_kodi_version() < 16:
-        xbmcgui.Dialog().notification("Artwork Beef", L(M.VERSION_REQUIRED).format("Kodi 16"), xbmcgui.NOTIFICATION_INFO)
+        xbmcgui.Dialog().notification("Artwork Beef", L(M.VERSION_REQUIRED).format("Kodi 16"),
+                                      xbmcgui.NOTIFICATION_INFO)
         return
     xbmcgui.Dialog().textviewer("Artwork Beef: " + L(M.REPORT_TITLE), reporting.get_latest_report())
+
 
 def set_autoaddepisodes():
     busy = pykodi.get_busydialog()
     busy.create()
     serieslist = [series for series in quickjson.get_tvshows(True) if series.get('imdbnumber')]
     busy.close()
-    selected = SeriesSelector('DialogSelect.xml', settings.addon_path, serieslist=serieslist, selected=settings.autoadd_episodes).prompt()
+    selected = SeriesSelector('DialogSelect.xml', settings.addon_path, serieslist=serieslist,
+                              selected=settings.autoadd_episodes).prompt()
     if selected != settings.autoadd_episodes:
         settings.autoadd_episodes = selected
         if xbmcgui.Dialog().yesno(L(M.ADD_MISSING_HEADER), L(M.ADD_MISSING_MESSAGE)):
             pykodi.execute_builtin('NotifyAll(script.artwork.beef:control, ProcessAfterSettings)')
+
 
 def runon_medialist(function, heading, medialist='videos', typelabel=None, fg=False):
     progress = xbmcgui.DialogProgress() if fg else xbmcgui.DialogProgressBG()
@@ -251,26 +271,26 @@ def runon_medialist(function, heading, medialist='videos', typelabel=None, fg=Fa
 
     if medialist == 'videos':
         steps_to_run = [(lambda: quickjson.get_item_list(mediatypes.MOVIE), L(M.MOVIES)),
-            (info.get_cached_tvshows, L(M.SERIES)),
-            (quickjson.get_seasons, L(M.SEASONS)),
-            (lambda: quickjson.get_item_list(mediatypes.MOVIESET), L(M.MOVIESETS)),
-            (quickjson.get_episodes, L(M.EPISODES)),
-            (lambda: quickjson.get_item_list(mediatypes.MUSICVIDEO), L(M.MUSICVIDEOS))]
+                        (info.get_cached_tvshows, L(M.SERIES)),
+                        (quickjson.get_seasons, L(M.SEASONS)),
+                        (lambda: quickjson.get_item_list(mediatypes.MOVIESET), L(M.MOVIESETS)),
+                        (quickjson.get_episodes, L(M.EPISODES)),
+                        (lambda: quickjson.get_item_list(mediatypes.MUSICVIDEO), L(M.MUSICVIDEOS))]
     elif medialist == 'music' and get_kodi_version() >= 18:
         steps_to_run = [(lambda: quickjson.get_item_list(mediatypes.ARTIST), L(M.ARTISTS)),
-            (lambda: quickjson.get_item_list(mediatypes.ALBUM), L(M.ALBUMS)),
-            (lambda: quickjson.get_item_list(mediatypes.SONG), L(M.SONGS))]
+                        (lambda: quickjson.get_item_list(mediatypes.ALBUM), L(M.ALBUMS)),
+                        (lambda: quickjson.get_item_list(mediatypes.SONG), L(M.SONGS))]
     else:
         steps_to_run = ((lambda: medialist, typelabel),)
     stepsize = 100 // len(steps_to_run)
 
-    def update_art_for_items(items, start):
+    def update_art_for_items(items, _start):
         changedcount = 0
-        for i, item in enumerate(items):
+        for _i, item in enumerate(items):
             if fg:
-                progress.update(start + i * stepsize // len(items), item['label'])
+                progress.update(_start + _i * stepsize // len(items), item['label'])
             else:
-                progress.update(start + i * stepsize // len(items))
+                progress.update(_start + _i * stepsize // len(items))
             item = info.MediaItem(item)
             if item.mediatype == mediatypes.SEASON:
                 item.file = info.get_cached_tvshow(item.tvshowid)['file']
@@ -301,6 +321,7 @@ def runon_medialist(function, heading, medialist='videos', typelabel=None, fg=Fa
     progress.close()
     return fixcount
 
+
 def get_command():
     command = {}
     for i in range(1, len(sys.argv)):
@@ -308,6 +329,7 @@ def get_command():
         command[arg[0].strip().lower()] = arg[1].strip() if len(arg) > 1 else True
 
     return command
+
 
 if __name__ == '__main__':
     main()

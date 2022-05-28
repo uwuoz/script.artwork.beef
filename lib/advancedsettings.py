@@ -32,6 +32,7 @@ RESTORE_SUCCESSFUL = 32657
 RESTORE_UNSUCCESSFUL = 32658
 RESTART_KODI = 32659
 
+
 def save_arttypes(arttype_map):
     root = read_xml()
     if root is None:
@@ -43,6 +44,7 @@ def save_arttypes(arttype_map):
     if save_backup():
         save_xml(root)
         xbmcgui.Dialog().ok("Artwork Beef", L(RESTART_KODI))
+
 
 def set_arttypes(root, arttype_map):
     for key, artlist in arttype_map.items():
@@ -68,6 +70,7 @@ def set_arttypes(root, arttype_map):
         elif mediatype_elem is not None:
             library_elem.remove(mediatype_elem)
 
+
 def read_xml():
     if not xbmcvfs.exists(FILENAME):
         return ET.Element(ROOT_TAG)
@@ -79,10 +82,12 @@ def read_xml():
         except ET.ParseError:
             log("Can't parse advancedsettings.xml", xbmc.LOGWARNING)
 
+
 def save_xml(advancedsettings):
     indent(advancedsettings)
     with closing(xbmcvfs.File(FILENAME, 'w')) as as_xml:
         ET.ElementTree(advancedsettings).write(as_xml, 'utf-8', True)
+
 
 def save_backup():
     if xbmcvfs.exists(FILENAME):
@@ -95,6 +100,7 @@ def save_backup():
         return result
     log("advancedsettings.xml doesn't exist, can't save backup", xbmc.LOGNOTICE)
     return True
+
 
 def restore_backup():
     if xbmcvfs.exists(FILENAME_BAK):
@@ -109,8 +115,10 @@ def restore_backup():
     log("advancedsettings.xml.beef.bak doesn't exist, can't restore backup", xbmc.LOGWARNING)
     return False
 
+
 def has_backup():
     return xbmcvfs.exists(FILENAME_BAK)
+
 
 def indent(element, level=0):
     i = "\n" + level*"\t"
@@ -126,6 +134,7 @@ def indent(element, level=0):
     else:
         if level and (not element.tail or not element.tail.strip()):
             element.tail = i
+
 
 class CommentedTreeBuilder(ET.TreeBuilder):
     def comment(self, data):

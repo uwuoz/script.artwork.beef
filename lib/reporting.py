@@ -36,6 +36,7 @@ NO_IDS_MESSAGE = 32030
 
 debug = False
 
+
 def report_startup():
     if not xbmcvfs.exists(settings.datapath):
         xbmcvfs.mkdir(settings.datapath)
@@ -47,6 +48,7 @@ def report_startup():
             reportfile.seek(0, os.SEEK_END)
             write(reportfile, newline)
             finish_chunk(reportfile)
+
 
 def report_start(medialist):
     if debug:
@@ -63,6 +65,7 @@ def report_start(medialist):
 
         write(reportfile, L(ITEM_COUNT).format(len(medialist)) + " - " +
             ', '.join('{0}: {1}'.format(mt, mediatypecount[mt]) for mt in mediatypecount))
+
 
 def report_end(medialist, abortedcount, downloaded_size):
     if debug:
@@ -103,11 +106,13 @@ def report_end(medialist, abortedcount, downloaded_size):
     if _should_rotate():
         _rotate_file()
 
+
 def report_item(mediaitem, forcedreport=False, manual=False, downloaded_size=0):
     if debug or not forcedreport and not settings.report_peritem:
         return
     with _get_file() as reportfile:
-        itemtitle = "{0} '{1}'".format(mediaitem.mediatype, mediaitem.label) if mediaitem.mediatype != mediatypes.EPISODE \
+        itemtitle = "{0} '{1}'".format(mediaitem.mediatype, mediaitem.label) \
+            if mediaitem.mediatype != mediatypes.EPISODE \
             else "{0} '{1}' of '{2}'".format(mediaitem.mediatype, mediaitem.label, mediaitem.showtitle)
         message = "== {0}: ".format(get_datetime()) if forcedreport else ""
         message += L(PROCESSING_MANUALLY if manual else PROCESSING)
@@ -134,17 +139,22 @@ def report_item(mediaitem, forcedreport=False, manual=False, downloaded_size=0):
     if forcedreport and _should_rotate():
         _rotate_file()
 
+
 def get_datetime():
     return pykodi.get_infolabel('System.Date(yyyy-mm-dd)') + ' ' + pykodi.get_infolabel('System.Time(hh:mm:ss xx)')
+
 
 def write(reportfile, line):
     reportfile.write(line + '\n')
 
+
 def finish_chunk(reportfile):
     reportfile.write('\n')
 
+
 def get_latest_report():
-    if not _exists(): return ""
+    if not _exists():
+        return ""
     result = []
     with _get_file(True) as reportfile:
         inserti = 0
@@ -156,14 +166,17 @@ def get_latest_report():
                 inserti += 1
     return ''.join(result)
 
+
 def _should_rotate():
     if not _exists():
         return False
     return xbmcvfs.Stat(_get_filepath()).st_size() > _get_maxsize()
 
+
 def _get_maxsize():
     mult = PER_ITEM_MULT if settings.report_peritem else 1
     return REPORT_SIZE * mult
+
 
 def _rotate_file():
     newdate = ndate = pykodi.get_infolabel('System.Date(yyyy-mm-dd)')
@@ -190,13 +203,17 @@ def _rotate_file():
     report_startup()
     return True
 
+
 def _get_file(readonly=False):
     return open(xbmc.translatePath(_get_filepath()), 'r' if readonly else 'a+')
+
 
 def _exists(filetag=''):
     return xbmcvfs.exists(_get_filepath(filetag))
 
+
 def _get_filepath(filetag=''):
     return settings.datapath + REPORT_NAME + ('.' + filetag if filetag else '') + '.txt'
+
 
 report_startup()

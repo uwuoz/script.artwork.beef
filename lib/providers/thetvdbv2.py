@@ -9,6 +9,7 @@ from lib.libs.addonsettings import settings
 from lib.libs.pykodi import json, UTF8JSONDecoder
 from lib.libs.utils import SortedDisplay
 
+
 class TheTVDBProvider(AbstractImageProvider):
     name = SortedDisplay('thetvdb.com', 'TheTVDB.com')
     mediatype = mediatypes.TVSHOW
@@ -33,7 +34,8 @@ class TheTVDBProvider(AbstractImageProvider):
         response = self.doget(self.apiurl % mediaid, **getparams)
         return 'Empty' if response is None else json.loads(response.text, cls=UTF8JSONDecoder)
 
-    def _get_rating(self, image):
+    @staticmethod
+    def _get_rating(image):
         if image['ratingsInfo']['count']:
             info = image['ratingsInfo']
             rating = info['average']
@@ -94,11 +96,11 @@ class TheTVDBProvider(AbstractImageProvider):
                     if any(x for x in result[ntype] if x['url'].endswith(image['fileName'])):
                         continue
 
-                    resultimage = {'provider': self.name}
-                    resultimage['url'] = self.imageurl_base + image['fileName']
-                    resultimage['preview'] = self.imageurl_base + (image['thumbnail'] or '_cache/' + image['fileName'])
-                    resultimage['language'] = language if shouldset_imagelanguage(image) else None
-                    resultimage['rating'] = self._get_rating(image)
+                    resultimage = {'provider': self.name, 'url': self.imageurl_base + image['fileName'],
+                                   'preview': self.imageurl_base + (
+                                               image['thumbnail'] or '_cache/' + image['fileName']),
+                                   'language': language if shouldset_imagelanguage(image) else None,
+                                   'rating': self._get_rating(image)}
                     if arttype in ('series', 'seasonwide'):
                         resultimage['size'] = SortedDisplay(758, '758x140')
                     elif arttype == 'season':
@@ -120,8 +122,9 @@ class TheTVDBProvider(AbstractImageProvider):
         return True
 
     def provides(self, types):
-        types = set(x if not x.startswith('season.') else re.sub(r'[\d]', '%s', x) for x in types)
+        types = set(x if not x.startswith('season.') else re.sub(r'\d', '%s', x) for x in types)
         return any(x in types for x in self.artmap.values())
+
 
 def parse_sortsize(image, arttype):
     try:
@@ -130,6 +133,7 @@ def parse_sortsize(image, arttype):
         sortsize = 0
     return SortedDisplay(sortsize, image['resolution'])
 
+
 def shouldset_imagelanguage(image):
     if image['keyType'] == 'series':
         return image['subKey'] != 'blank'
@@ -137,8 +141,10 @@ def shouldset_imagelanguage(image):
         return image['subKey'] == 'text'
     return True
 
+
 def typematches(arttype, types):
-    return any(x for x in types if arttype == (x if not x.startswith('season.') else re.sub(r'[\d]', '%s', x)))
+    return any(x for x in types if arttype == (x if not x.startswith('season.') else re.sub(r'\d', '%s', x)))
+
 
 def get_mediaid(uniqueids):
     for source in ('tvdb', 'unknown'):

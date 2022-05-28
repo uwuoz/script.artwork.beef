@@ -13,14 +13,48 @@ AVAILABLE_IMAGESIZES = {'0': (10000, 10000, 600), '1': (1920, 1080, 600), '2': (
 
 PROGRESS_DISPLAY_FULLPROGRESS = '0'
 PROGRESS_DISPLAY_WARNINGSERRORS = '1'
-PROGRESS_DISPLAY_NONE = '2' # Only add-on crashes
+PROGRESS_DISPLAY_NONE = '2'  # Only add-on crashes
 
 EXCLUSION_PATH_TYPE_FOLDER = '0'
 EXCLUSION_PATH_TYPE_PREFIX = '1'
 EXCLUSION_PATH_TYPE_REGEX = '2'
 
+
 class Settings(object):
     def __init__(self):
+        self.identify_alternatives = None
+        self.apiconfig = None
+        self.preferredsize = None
+        self.enableservice_music = None
+        self.minimum_size = None
+        self.clean_imageurls = None
+        self.language_fallback_en = None
+        self.minimum_rating = None
+        self.language_fallback_kodi = None
+        self.language_override = None
+        self.default_tvidsource = None
+        self.savewith_basefilename = None
+        self.cache_local_music_artwork = None
+        self.progressdisplay = None
+        self.recycle_removed = None
+        self.cache_local_video_artwork = None
+        self.remove_deselected_files = None
+        self.savewith_basefilename_mvids = None
+        self.albumartwithmediafiles = None
+        self.use_tmdb_keyart = None
+        self.save_extrafanart = None
+        self.save_extrafanart_mvids = None
+        self.final_notification = None
+        self.setartwork_subdirs = None
+        self.report_peritem = None
+        self.titlefree_poster = None
+        self.fanarttv_clientkey = None
+        self.titlefree_fanart = None
+        self.setartwork_fromparent = None
+        self.enable_olditem_updates = None
+        self.enableservice = None
+        self.useragent = None
+        self.pathexclusion = None
         self.addon_path = addon.path
         self.datapath = addon.datapath
         self._autoadd_episodes = ()
@@ -38,7 +72,8 @@ class Settings(object):
         self.useragent = 'ArtworkBeef/{0} '.format(beefversion) + xbmc.getUserAgent()
 
     def update_settings(self):
-        self._autoadd_episodes = addon.get_setting('autoaddepisodes_list') if addon.get_setting('episode.fanart') else ()
+        self._autoadd_episodes = addon.get_setting('autoaddepisodes_list') \
+            if addon.get_setting('episode.fanart') else ()
         self.enableservice = addon.get_setting('enableservice')
         self.enableservice_music = addon.get_setting('enableservice_music')
         self.enable_olditem_updates = addon.get_setting('enable_olditem_updates')
@@ -126,11 +161,13 @@ class Settings(object):
         self._autoadd_episodes = value
         addon.set_setting('autoaddepisodes_list', value)
 
+
 def get_projectkey(provider):
     return projectkeys.FANARTTV_PROJECTKEY if provider == 'fanarttv' else \
         projectkeys.THETVDB_PROJECTKEY if provider == 'tvdb' else \
         projectkeys.TMDB_PROJECTKEY if provider == 'tmdb' else \
         projectkeys.TADB_PROJECTKEY if provider == 'tadb' else \
         ''
+
 
 settings = Settings()
