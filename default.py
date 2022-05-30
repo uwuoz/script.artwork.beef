@@ -93,10 +93,7 @@ def main():
         selected = xbmcgui.Dialog().select('Artwork Beef', [option[0] for option in options])
         if 0 <= selected < len(options):
             action = options[selected][1]
-            if isinstance(action, str):
-                pykodi.execute_builtin(action)
-            else:
-                action()
+            pykodi.execute_builtin(action) if isinstance(action, str) else action()
 
 
 def notify_count(message, count):

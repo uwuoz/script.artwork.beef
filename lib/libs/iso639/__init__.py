@@ -144,20 +144,19 @@ def to_native(key):
 
 def _load_data():
     def parse_line(line):
-        data = line.strip().split('|')
+        line_data = line.strip().split('|')
         return {
-            u'iso639_2_b': data[0],
-            u'iso639_2_t': data[1],
-            u'iso639_1': data[2],
-            u'name': data[3],
-            u'native': data[4],
+            u'iso639_2_b': line_data[0],
+            u'iso639_2_t': line_data[1],
+            u'iso639_1': line_data[2],
+            u'name': line_data[3],
+            u'native': line_data[4],
         }
 
-    data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             'languages_utf-8.txt')
+    data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'languages_utf-8.txt')
     with codecs.open(data_file, 'r', 'UTF-8') as f:
-        data = [parse_line(line) for line in f]
-    return data
+        _data = [parse_line(line) for line in f]
+    return _data
 
 
 data = _load_data()

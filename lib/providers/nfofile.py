@@ -99,7 +99,6 @@ class NFOFileMovieSetProvider(NFOFileAbstractProvider):
             paths = [os.path.splitext(path)[0] + '.nfo', os.path.splitext(path)[0] + '/set.nfo']
         else:
             paths = [path + 'set.nfo']
-
         artlist = None
         for nfopath in paths:
             root = read_nfofile(nfopath)

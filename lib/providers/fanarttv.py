@@ -134,7 +134,8 @@ class FanartTVSeriesProvider(FanartTVAbstractProvider):
         except ValueError:
             if not ignoreall:
                 self.log("Image season was set incorrectly for '%s', to \"%s\", so I can't tell which season "
-                    "it belongs to. The image URL is:\n%s" % (itemname, image['season'], image['url']), xbmc.LOGINFO)
+                         "it belongs to. The image URL is:\n%s" % (itemname, image['season'], image['url']),
+                         xbmc.LOGINFO)
             # throw it into the 'all seasons' image pile
             return allitem
 
@@ -290,8 +291,8 @@ def _get_imagelanguage(arttype, image):
     if 'lang' not in image or arttype in ('showbackground', 'characterart', 'moviebackground', 'artistbackground'):
         return None
     if arttype in ('clearlogo', 'hdtvlogo', 'seasonposter', 'hdclearart', 'clearart', 'tvthumb', 'seasonthumb',
-            'tvbanner', 'seasonbanner', 'movielogo', 'hdmovielogo', 'hdmovieclearart', 'movieart', 'moviebanner',
-            'moviethumb', 'moviedisc'):
+                   'tvbanner', 'seasonbanner', 'movielogo', 'hdmovielogo', 'hdmovieclearart', 'movieart', 'moviebanner',
+                   'moviethumb', 'moviedisc'):
         return image['lang'] if image['lang'] not in ('', '00') else 'en'
     # tvposter and movieposter may or may not have a title and thus need a language
     return image['lang'] if image['lang'] not in ('', '00') else None
