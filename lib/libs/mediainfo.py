@@ -226,6 +226,7 @@ def remove_local_from_texturecache(urls, include_generated=False):
             quickjson.remove_texture_byurl(url)
 
 
+# noinspection PyUnusedLocal
 def add_additional_iteminfo(mediaitem, processed, search=None):
     """Get more data from the Kodi library, processed items, and look up web service IDs."""
     if search and mediaitem.mediatype in search:
@@ -258,6 +259,7 @@ def add_additional_iteminfo(mediaitem, processed, search=None):
                 if searchresults:
                     for result in searchresults:
                         if result['label'] == mediaitem.label:
+                            # noinspection PyUnusedLocal
                             uniqueid = result['uniqueids']['tmdb']
                             break
                     uniqueid = searchresults[0]['uniqueids']['tmdb']

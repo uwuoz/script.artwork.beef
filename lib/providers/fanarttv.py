@@ -204,6 +204,7 @@ class FanartTVMusicVideoProvider(FanartTVAbstractProvider):
         'musicbanner': 'banner'
     }
 
+    # noinspection PyMethodOverriding
     def _get_images(self, data, albumid):
         def poofit(_arttype, _artlist, resultmap):
             generaltype = self.artmap.get(_arttype)
