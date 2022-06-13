@@ -80,7 +80,7 @@ class Database(object):
         dbpath = settings.datapath
         if not xbmcvfs.exists(dbpath):
             xbmcvfs.mkdir(dbpath)
-        dbpath = xbmc.translatePath(dbpath + databasename + '.db')
+        dbpath = xbmcvfs.translatePath(dbpath + databasename + '.db')
         self._conn = sqlite3.connect(dbpath)
         self._conn.row_factory = sqlite3.Row
         self._conn.text_factory = str

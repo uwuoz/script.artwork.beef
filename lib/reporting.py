@@ -206,7 +206,7 @@ def _rotate_file():
 
 
 def _get_file(readonly=False):
-    return open(xbmc.translatePath(_get_filepath()), 'r' if readonly else 'a+')
+    return open(xbmcvfs.translatePath(_get_filepath()), 'r' if readonly else 'a+')
 
 
 def _exists(filetag=''):

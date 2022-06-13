@@ -9,6 +9,7 @@ import urllib.parse
 from datetime import datetime
 
 import xbmc
+import xbmcvfs
 import xbmcaddon
 
 try:
@@ -218,7 +219,7 @@ class Addon(xbmcaddon.Addon):
         self.version = self.getAddonInfo('version')
         self.path = self.getAddonInfo('path')
         self.datapath = self.getAddonInfo('profile')  # WARN: This can change if Kodi profile changes
-        self.resourcespath = os.path.join(xbmc.translatePath(self.path).decode('utf-8'), 'resources')
+        self.resourcespath = os.path.join(xbmcvfs.translatePath(self.path), 'resources')
         if not os.path.isdir(self.resourcespath):
             self.resourcespath = None
 
