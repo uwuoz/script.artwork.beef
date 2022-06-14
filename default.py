@@ -307,10 +307,7 @@ def runon_medialist(function, heading, medialist='videos', typelabel=None, fg=Fa
     fixcount = 0
     for i, (list_fn, listtype) in enumerate(steps_to_run):
         start = i * stepsize
-        if fg:
-            progress.update(start, line1=L(M.LISTING_ALL).format(listtype))
-        else:
-            progress.update(start, message=L(M.LISTING_ALL).format(listtype))
+        progress.update(start, message=L(M.LISTING_ALL).format(listtype))
         fixcount += update_art_for_items(list_fn(), start)
         if monitor.abortRequested() or fg and progress.iscanceled():
             break
